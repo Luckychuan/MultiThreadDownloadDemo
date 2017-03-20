@@ -8,18 +8,28 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     //绑定Service，实现Activity和Service通信
     private DownloadService.DownloadBinder mServiceBinder;
 
+    private Button mStartButton;
+    private TextView mFileName;
+    private ProgressBar mProgressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ((Button)findViewById(R.id.test1_btn)).setOnClickListener(this);
+        mStartButton = (Button)findViewById(R.id.start_btn);
+        mFileName = (TextView) findViewById(R.id.file_name);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+        mStartButton.setOnClickListener(this);
 
         //绑定Service
         Intent serviceIntent = new Intent(this,DownloadService.class);
