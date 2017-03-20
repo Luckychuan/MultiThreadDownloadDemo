@@ -14,13 +14,18 @@
         android:text="@string/test"
         android:textSize="20dp" />
 
+    <TextView
+        android:id="@+id/progress_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/test"
+        android:textSize="15dp" />
 
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-         />
+        android:layout_height="30dp" />
 
     <Button
         android:id="@+id/new_task"
