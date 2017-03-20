@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String URL = "http://www.imooc.com/mobile/imooc.apk";
+
     //绑定Service，实现Activity和Service通信
     private DownloadService.DownloadBinder mServiceBinder;
 
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mStartButton = (Button)findViewById(R.id.start_btn);
         mFileName = (TextView) findViewById(R.id.file_name);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        ((Button)findViewById(R.id.new_task)).setOnClickListener(this);
 
         mStartButton.setOnClickListener(this);
 
@@ -52,7 +55,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.test1_btn:
+            case R.id.start_btn:
+                mServiceBinder.startDownload(URL);
+                break;
+            case R.id.new_task:
+                //初始化UI
+                mFileName.setText(URL.lastIndexOf("/"));
+                mStartButton.setText(getResources().getString(R.string.pause));
                 mServiceBinder.startDownload("test");
         }
     }

@@ -3,4 +3,5 @@
     <string name="test">test</string>
     <string name="start">继续</string>
     <string name="pause">暂停</string>
+    <string name="new_task">新建</string>
 </resources>

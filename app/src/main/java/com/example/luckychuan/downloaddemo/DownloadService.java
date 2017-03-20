@@ -25,8 +25,13 @@ public class DownloadService extends Service {
     class DownloadBinder extends Binder{
 
         public void startDownload(String url){
-            Log.d(TAG, "startDownload: ");
-            //判断是否是新任务
+            Log.d(TAG, "startDownload: "+url);
+
+
+        }
+
+        public void newTask(String url){
+   //         DownloadAsyncTask task = new DownloadAsyncTask();
         }
 
         public void pauseDownload(String url){
