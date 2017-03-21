@@ -57,13 +57,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.start_btn:
-                mServiceBinder.startDownload(URL);
+                if (!mServiceBinder.isDownloading(URL)) {
+                    mServiceBinder.startDownload(URL);
+                } else {
+                    mServiceBinder.pauseDownload(URL);
+                }
                 break;
             case R.id.new_task:
                 //初始化UI
-                mFileName.setText(URL.substring(URL.lastIndexOf("/")+1));
-                mStartButton.setText(getResources().getString(R.string.pause));
+                mFileName.setText(URL.substring(URL.lastIndexOf("/") + 1));
                 mServiceBinder.newTask(URL);
+                break;
         }
     }
 
