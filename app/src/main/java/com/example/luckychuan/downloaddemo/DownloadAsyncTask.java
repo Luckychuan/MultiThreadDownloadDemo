@@ -13,9 +13,8 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     private int mStatus;
     public static final int STATUS_DOWNLOADING = 0;
     public static final int STATUS_SUCCEED = 1;
-    public static final int STATUS_FAILED = 2;
-    public static final int STATUS_PAUSED = 3;
-    public static final int STATUS_CANCELED = 4;
+    public static final int STATUS_STOP= 2;
+
 
     private Task task;
 
@@ -33,11 +32,13 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     }
 
 
+    /**
+     * 开始下载之前更新UI
+     */
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        //修改UI
-        MainActivity.setStartButtonText(true);
+//        MainActivity.setStartButtonText(true);
 //        MainActivity.initProgressBar(progress,100);
 
     }
@@ -51,7 +52,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         //获取已下载的进度
         int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
         for (int i = progress; i <= 100; i++) {
-            if (mStatus == STATUS_PAUSED || mStatus == STATUS_CANCELED) {
+            if (mStatus == STATUS_STOP) {
                 return mStatus;
             }
             i++;
@@ -68,7 +69,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         if (task.getDownloadedLength() >= task.getContentLength()) {
             mStatus = STATUS_SUCCEED;
         } else {
-            mStatus = STATUS_FAILED;
+            mStatus = STATUS_STOP;
         }
         return mStatus;
 
@@ -86,23 +87,9 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         MainActivity.showProgress(values[0]);
     }
 
-    public void setPause() {
-        MainActivity.setStartButtonText(false);
-        mStatus = STATUS_PAUSED;
+    public void StopDownload() {
+        mStatus = STATUS_STOP;
     }
-
-    public void setCanceled() {
-        mStatus = STATUS_CANCELED;
-    }
-
-    public boolean isDownloading() {
-        if (mStatus == STATUS_DOWNLOADING) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 
     interface DownloadListener {
         void DownloadResult(int result);

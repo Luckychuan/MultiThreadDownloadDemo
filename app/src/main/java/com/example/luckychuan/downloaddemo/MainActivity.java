@@ -59,25 +59,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.start_btn:
                 if (!mServiceBinder.isDownloading(URL)) {
                     mServiceBinder.startDownload(URL);
+                    mStartButton.setText(getResources().getString(R.string.pause));
                 } else {
                     mServiceBinder.pauseDownload(URL);
+                    mStartButton.setText(getResources().getString(R.string.start));
                 }
                 break;
             case R.id.new_task:
                 //初始化UI
                 mFileName.setText(URL.substring(URL.lastIndexOf("/") + 1));
                 mServiceBinder.newTask(URL);
+                mStartButton.setText(getResources().getString(R.string.pause));
                 break;
         }
     }
 
-    public static void setStartButtonText(boolean isDownloading) {
-        if (isDownloading) {
-            mStartButton.setText("暂停");
-        } else {
-            mStartButton.setText("继续");
-        }
-    }
+//    public static void setStartButtonText(boolean isDownloading) {
+//        if (isDownloading) {
+//            mStartButton.setText("暂停");
+//        } else {
+//            mStartButton.setText("继续");
+//        }
+//    }
 
 
     public static void showProgress(int progress) {
