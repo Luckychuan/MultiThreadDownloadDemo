@@ -43,7 +43,7 @@ public class Task {
 
     public void pause(){
         isDownloading = false;
-        asyncTask.StopDownload();
+        asyncTask.pauseDownload();
         asyncTask = null;
     }
 

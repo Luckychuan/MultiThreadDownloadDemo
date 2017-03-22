@@ -39,5 +39,11 @@
         android:layout_height="wrap_content"
         android:text="@string/start" />
 
+    <Button
+        android:id="@+id/query"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/query"/>
+
 
 </LinearLayout>

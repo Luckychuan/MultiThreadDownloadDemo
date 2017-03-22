@@ -6,12 +6,20 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.litepal.crud.DataSupport;
+import org.litepal.tablemanager.Connector;
+
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private static final String TAG = "MainActivity";
 
     private static final String URL = "http://www.imooc.com/mobile/imooc.apk";
 
@@ -32,9 +40,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mFileName = (TextView) findViewById(R.id.file_name);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         ((Button) findViewById(R.id.new_task)).setOnClickListener(this);
+        ((Button) findViewById(R.id.query)).setOnClickListener(this);
         mProgressText = (TextView) findViewById(R.id.progress_text);
-
         mStartButton.setOnClickListener(this);
+
+        //创建LitePal数据库
+        Connector.getDatabase();
 
         //绑定Service
         Intent serviceIntent = new Intent(this, DownloadService.class);
@@ -70,6 +81,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mFileName.setText(URL.substring(URL.lastIndexOf("/") + 1));
                 mServiceBinder.newTask(URL);
                 mStartButton.setText(getResources().getString(R.string.pause));
+                break;
+            case R.id.query:
+                List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
+                if(taskList.size() == 0){
+                    Log.d(TAG, "onClick: 无数据");
+                }
+                for (TaskDB t : taskList) {
+                    Log.d(TAG, "onClick: " + t.getUrl());
+                    Log.d(TAG, "onClick: " + t.getName());
+                    Log.d(TAG, "onClick: " + t.getDownloadedLength());
+                    Log.d(TAG, "onClick: " + t.getContentLength());
+                }
                 break;
         }
     }

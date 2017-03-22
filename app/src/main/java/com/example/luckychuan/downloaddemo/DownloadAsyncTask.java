@@ -2,6 +2,10 @@ package com.example.luckychuan.downloaddemo;
 
 import android.os.AsyncTask;
 
+import org.litepal.crud.DataSupport;
+
+import java.util.List;
+
 /**
  * @Integer 下载的进度
  * @Integer 下载状态的提示
@@ -13,7 +17,8 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     private int mStatus;
     public static final int STATUS_DOWNLOADING = 0;
     public static final int STATUS_SUCCEED = 1;
-    public static final int STATUS_STOP= 2;
+    public static final int STATUS_PAUSED= 2;
+    public static final int STATUS_CANCEKED = 3;
 
 
     private Task task;
@@ -25,10 +30,30 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
 
         task = t;
         String url = task.getUrl();
-        task.setName(url.substring(url.lastIndexOf("/") + 1));
+        String name = url.substring(url.lastIndexOf("/") + 1);
+        task.setName(name);
 
-        //模拟长度
-        task.setContentLength(100);
+        //判断任务是否已经创建到数据库中
+        List<TaskDB> taskList = DataSupport.where("url=?",url).find(TaskDB.class);
+        if(taskList.size() ==0){
+            long contentLength = 100;
+
+            TaskDB taskDB = new TaskDB();
+            taskDB.setUrl(url);
+            taskDB.setName(name);
+            taskDB.setDownloadedLength(0);
+            taskDB.setContentLength(contentLength);
+            taskDB.save();
+
+            task.setDownloadedLength(0);
+            task.setContentLength(contentLength);
+            task.setContentLength(contentLength);
+        }else {
+            TaskDB taskDB= taskList.get(0);
+            task.setDownloadedLength(taskDB.getDownloadedLength());
+            task.setContentLength(taskDB.getContentLength());
+        }
+
     }
 
 
@@ -52,7 +77,15 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         //获取已下载的进度
         int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
         for (int i = progress; i <= 100; i++) {
-            if (mStatus == STATUS_STOP) {
+            if (mStatus == STATUS_PAUSED) {
+                //更新进度到数据库中
+                TaskDB taskDB = new TaskDB();
+                taskDB.setDownloadedLength(task.getDownloadedLength());
+                taskDB.updateAll("url=?",task.getUrl());
+                return mStatus;
+            }else if(mStatus == STATUS_CANCEKED){
+                //从数据库中删除本条记录
+                DataSupport.deleteAll(TaskDB.class,"url=?",task.getUrl());
                 return mStatus;
             }
             i++;
@@ -68,9 +101,8 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
 
         if (task.getDownloadedLength() >= task.getContentLength()) {
             mStatus = STATUS_SUCCEED;
-        } else {
-            mStatus = STATUS_STOP;
         }
+
         return mStatus;
 
     }
@@ -87,8 +119,11 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         MainActivity.showProgress(values[0]);
     }
 
-    public void StopDownload() {
-        mStatus = STATUS_STOP;
+    public void pauseDownload() {
+        mStatus = STATUS_PAUSED;
+    }
+    public void cancelDownload(){
+        mStatus = STATUS_CANCEKED;
     }
 
     interface DownloadListener {
