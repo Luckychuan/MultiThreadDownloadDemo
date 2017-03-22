@@ -68,11 +68,11 @@ public class DownloadService extends Service {
             task.pause();
         }
 
-//        public void cancelDownload(String url) {
-//            Log.d(TAG, "cancelDownload: ");
-//            taskMap.get(url).getAsyncTask().setCanceled();
-//            taskMap.remove(url);
-//        }
+        public void cancelDownload(String url) {
+            Log.d(TAG, "cancelDownload: ");
+            mTaskMap.get(url).cancel();
+            mTaskMap.remove(url);
+        }
 
         public boolean isDownloading(String url) {
             return mTaskMap.get(url).isDownloading();

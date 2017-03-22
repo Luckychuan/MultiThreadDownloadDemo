@@ -29,7 +29,7 @@
         android:max="100"/>
 
     <Button
-        android:id="@+id/new_task"
+        android:id="@+id/new_task_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/new_task" />
@@ -39,12 +39,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/start" />
+    <Button
+        android:id="@+id/cancel_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        />
 
     <Button
         android:id="@+id/query"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/query"/>
+
 
 
 </LinearLayout>

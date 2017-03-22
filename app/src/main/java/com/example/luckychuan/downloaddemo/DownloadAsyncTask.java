@@ -121,9 +121,11 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
 
     public void pauseDownload() {
         mStatus = STATUS_PAUSED;
+        mListener.DownloadResult(STATUS_PAUSED);
     }
     public void cancelDownload(){
         mStatus = STATUS_CANCELED;
+        mListener.DownloadResult(STATUS_CANCELED);
     }
 
     interface DownloadListener {

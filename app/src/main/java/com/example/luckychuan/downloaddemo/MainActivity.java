@@ -48,6 +48,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mStartButton = (Button) findViewById(R.id.start_btn);
+        mFileName = (TextView) findViewById(R.id.file_name);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        ((Button) findViewById(R.id.new_task_btn)).setOnClickListener(this);
+        ((Button) findViewById(R.id.query)).setOnClickListener(this);
+        ((Button) findViewById(R.id.cancel_btn)).setOnClickListener(this);
+        mProgressText = (TextView) findViewById(R.id.progress_text);
+        mStartButton.setOnClickListener(this);
+
         initView();
 
         //创建LitePal数据库
@@ -63,16 +72,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 初始化界面
      */
     private void initView() {
-        mStartButton = (Button) findViewById(R.id.start_btn);
-        mFileName = (TextView) findViewById(R.id.file_name);
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        ((Button) findViewById(R.id.new_task)).setOnClickListener(this);
-        ((Button) findViewById(R.id.query)).setOnClickListener(this);
-        mProgressText = (TextView) findViewById(R.id.progress_text);
-        mStartButton.setOnClickListener(this);
 
         List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-        if(taskList.size() !=0){
+        if (taskList.size() != 0) {
             TaskDB task = taskList.get(0);
             mFileName.setText(task.getName());
             int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
@@ -95,15 +97,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     mStartButton.setText(getResources().getString(R.string.start));
                 }
                 break;
-            case R.id.new_task:
+            case R.id.new_task_btn:
                 //初始化UI
                 mFileName.setText(URL.substring(URL.lastIndexOf("/") + 1));
                 mServiceBinder.newTask(URL);
                 mStartButton.setText(getResources().getString(R.string.pause));
                 break;
+
+            case R.id.cancel_btn:
+                mServiceBinder.cancelDownload(URL);
+                break;
+
             case R.id.query:
                 List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-                if(taskList.size() == 0){
+                if (taskList.size() == 0) {
                     Log.d(TAG, "onClick: 无数据");
                 }
                 for (TaskDB t : taskList) {
@@ -120,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
-        stopService(new Intent(this,DownloadService.class));
+        stopService(new Intent(this, DownloadService.class));
     }
 
     //    public static void setStartButtonText(boolean isDownloading) {

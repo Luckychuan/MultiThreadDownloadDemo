@@ -45,6 +45,9 @@ public class Task {
                     DataSupport.deleteAll(TaskDB.class, "url=?", url);
                     Log.d(TAG, "DownloadResult: "+"下载成功");
                 }
+                if(result == DownloadAsyncTask.STATUS_CANCELED){
+                    DataSupport.deleteAll(TaskDB.class, "url=?", url);
+                }
             }
         });
         this.asyncTask = asyncTask;
@@ -56,6 +59,16 @@ public class Task {
         asyncTask.pauseDownload();
         asyncTask = null;
     }
+
+    public void cancel(){
+        asyncTask.cancelDownload();
+    }
+
+
+
+    /**
+     *以下为自动生成的方法
+     */
 
     public String getUrl() {
         return url;
