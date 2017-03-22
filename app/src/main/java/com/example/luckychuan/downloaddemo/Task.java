@@ -2,6 +2,8 @@ package com.example.luckychuan.downloaddemo;
 
 import android.util.Log;
 
+import org.litepal.crud.DataSupport;
+
 /**
  * java bean类.
  */
@@ -23,6 +25,13 @@ public class Task {
         this.url = url;
     }
 
+    public Task(String url, String name, long contentLength, long downloadedLength) {
+        this.url = url;
+        this.name = name;
+        this.contentLength = contentLength;
+        this.downloadedLength = downloadedLength;
+    }
+
     public boolean isDownloading(){
         return isDownloading;
     }
@@ -33,6 +42,7 @@ public class Task {
             @Override
             public void DownloadResult(int result) {
                 if (result == DownloadAsyncTask.STATUS_SUCCEED) {
+                    DataSupport.deleteAll(TaskDB.class, "url=?", url);
                     Log.d(TAG, "DownloadResult: "+"下载成功");
                 }
             }

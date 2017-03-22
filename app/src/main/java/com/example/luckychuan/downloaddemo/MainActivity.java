@@ -31,11 +31,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static ProgressBar mProgressBar;
     private static TextView mProgressText;
 
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mServiceBinder = (DownloadService.DownloadBinder) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initView();
+
+        //创建LitePal数据库
+        Connector.getDatabase();
+
+        //绑定Service
+        Intent serviceIntent = new Intent(this, DownloadService.class);
+        startService(serviceIntent);
+        bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+    }
+
+    /**
+     * 初始化界面
+     */
+    private void initView() {
         mStartButton = (Button) findViewById(R.id.start_btn);
         mFileName = (TextView) findViewById(R.id.file_name);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -44,23 +71,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mProgressText = (TextView) findViewById(R.id.progress_text);
         mStartButton.setOnClickListener(this);
 
-        //创建LitePal数据库
-        Connector.getDatabase();
+        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
+        if(taskList.size() !=0){
+            TaskDB task = taskList.get(0);
+            mFileName.setText(task.getName());
+            int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
+            showProgress(progress);
+        }
 
-        //绑定Service
-        Intent serviceIntent = new Intent(this, DownloadService.class);
-        startService(serviceIntent);
-        bindService(serviceIntent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mServiceBinder = (DownloadService.DownloadBinder) service;
-            }
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        }, BIND_AUTO_CREATE);
     }
 
 
@@ -97,7 +116,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-//    public static void setStartButtonText(boolean isDownloading) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
+        stopService(new Intent(this,DownloadService.class));
+    }
+
+    //    public static void setStartButtonText(boolean isDownloading) {
 //        if (isDownloading) {
 //            mStartButton.setText("暂停");
 //        } else {

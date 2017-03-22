@@ -18,7 +18,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     public static final int STATUS_DOWNLOADING = 0;
     public static final int STATUS_SUCCEED = 1;
     public static final int STATUS_PAUSED= 2;
-    public static final int STATUS_CANCEKED = 3;
+    public static final int STATUS_CANCELED = 3;
 
 
     private Task task;
@@ -83,7 +83,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
                 taskDB.setDownloadedLength(task.getDownloadedLength());
                 taskDB.updateAll("url=?",task.getUrl());
                 return mStatus;
-            }else if(mStatus == STATUS_CANCEKED){
+            }else if(mStatus == STATUS_CANCELED){
                 //从数据库中删除本条记录
                 DataSupport.deleteAll(TaskDB.class,"url=?",task.getUrl());
                 return mStatus;
@@ -123,7 +123,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         mStatus = STATUS_PAUSED;
     }
     public void cancelDownload(){
-        mStatus = STATUS_CANCEKED;
+        mStatus = STATUS_CANCELED;
     }
 
     interface DownloadListener {
