@@ -56,19 +56,6 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
 
     }
 
-
-    /**
-     * 开始下载之前更新UI
-     */
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-//        MainActivity.setStartButtonText(true);
-//        MainActivity.initProgressBar(progress,100);
-
-    }
-
-
     @Override
     protected Integer doInBackground(Void... params) {
         mStatus = STATUS_DOWNLOADING;
@@ -116,7 +103,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
-        MainActivity.showProgress(values[0]);
+        MainActivity.updateProgress();
     }
 
     public void pauseDownload() {

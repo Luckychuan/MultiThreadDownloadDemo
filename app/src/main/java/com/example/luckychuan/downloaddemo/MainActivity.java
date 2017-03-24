@@ -6,30 +6,32 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import org.litepal.crud.DataSupport;
 import org.litepal.tablemanager.Connector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "MainActivity";
 
-    private static final String URL = "http://www.imooc.com/mobile/imooc.apk";
+    private static final String URL1 = "http://www.imooc.com/mobile/imooc.apk";
+    private static final String URL2 = "http://s1.music.126.net/download/android/CloudMusic_official_4.0.0_179175.apk";
 
     //绑定Service，实现Activity和Service通信
     private DownloadService.DownloadBinder mServiceBinder;
 
-    private static Button mStartButton;
-    private TextView mFileName;
-    private static ProgressBar mProgressBar;
-    private static TextView mProgressText;
+    private ArrayList<Task> mTasks;
+
+    private static RecyclerAdapter mAdapter;
+
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -48,16 +50,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mStartButton = (Button) findViewById(R.id.start_btn);
-        mFileName = (TextView) findViewById(R.id.file_name);
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        ((Button) findViewById(R.id.new_task_btn)).setOnClickListener(this);
-        ((Button) findViewById(R.id.query)).setOnClickListener(this);
-        ((Button) findViewById(R.id.cancel_btn)).setOnClickListener(this);
-        mProgressText = (TextView) findViewById(R.id.progress_text);
-        mStartButton.setOnClickListener(this);
 
-        initView();
+        ((Button) findViewById(R.id.new_task_btn)).setOnClickListener(this);
+        ((Button) findViewById(R.id.new_task2_btn)).setOnClickListener(this);
+        ((Button) findViewById(R.id.query)).setOnClickListener(this);
+
+        mTasks = new ArrayList<>();
+        //从数据库中获取数据
+        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
+        if (taskList.size() != 0) {
+            for (TaskDB taskDB : taskList) {
+                mTasks.add(new Task(taskDB.getUrl(), taskDB.getName(), taskDB.getContentLength(), taskDB.getDownloadedLength()));
+            }
+        }
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter = new RecyclerAdapter(mTasks, new RecyclerAdapter.OnItemButtonClickListener() {
+            @Override
+            public void onStartButtonClick(String url, boolean toStartDownload) {
+                if (toStartDownload) {
+                    mServiceBinder.startDownload(url);
+                } else {
+                    mServiceBinder.pauseDownload(url);
+                }
+            }
+
+            @Override
+            public void onCancelButtonClick(String url) {
+                mServiceBinder.cancelDownload(url);
+            }
+        });
+        recyclerView.setAdapter(mAdapter);
 
         //创建LitePal数据库
         Connector.getDatabase();
@@ -68,44 +92,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
     }
 
-    /**
-     * 初始化界面
-     */
-    private void initView() {
-
-        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-        if (taskList.size() != 0) {
-            TaskDB task = taskList.get(0);
-            mFileName.setText(task.getName());
-            int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
-            showProgress(progress);
-        }
-
-
-    }
-
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.start_btn:
-                if (!mServiceBinder.isDownloading(URL)) {
-                    mServiceBinder.startDownload(URL);
-                    mStartButton.setText(getResources().getString(R.string.pause));
-                } else {
-                    mServiceBinder.pauseDownload(URL);
-                    mStartButton.setText(getResources().getString(R.string.start));
-                }
-                break;
             case R.id.new_task_btn:
-                //初始化UI
-                mFileName.setText(URL.substring(URL.lastIndexOf("/") + 1));
-                mServiceBinder.newTask(URL);
-                mStartButton.setText(getResources().getString(R.string.pause));
+                newTask(URL1);
                 break;
 
-            case R.id.cancel_btn:
-                mServiceBinder.cancelDownload(URL);
+            case R.id.new_task2_btn:
+                newTask(URL2);
                 break;
 
             case R.id.query:
@@ -123,6 +119,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void newTask(String url) {
+        Task task = new Task(url);
+        mTasks.add(task);
+        mAdapter.notifyDataSetChanged();
+        mServiceBinder.newTask(task);
+    }
+
+    public static void updateProgress(){
+        mAdapter.notifyDataSetChanged();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -130,18 +137,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         stopService(new Intent(this, DownloadService.class));
     }
 
-    //    public static void setStartButtonText(boolean isDownloading) {
-//        if (isDownloading) {
-//            mStartButton.setText("暂停");
-//        } else {
-//            mStartButton.setText("继续");
-//        }
-//    }
-
-
-    public static void showProgress(int progress) {
-        mProgressBar.setProgress(progress);
-        mProgressText.setText("已下载：" + progress);
-    }
 
 }

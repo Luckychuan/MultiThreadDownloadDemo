@@ -21,7 +21,7 @@ public class Task {
     private DownloadAsyncTask asyncTask;
     private boolean isDownloading;
 
-    public Task(String url){
+    public Task(String url) {
         this.url = url;
     }
 
@@ -32,20 +32,20 @@ public class Task {
         this.downloadedLength = downloadedLength;
     }
 
-    public boolean isDownloading(){
+    public boolean isDownloading() {
         return isDownloading;
     }
 
-    public void start(){
+    public void start() {
         isDownloading = true;
         DownloadAsyncTask asyncTask = new DownloadAsyncTask(this, new DownloadAsyncTask.DownloadListener() {
             @Override
             public void DownloadResult(int result) {
                 if (result == DownloadAsyncTask.STATUS_SUCCEED) {
                     DataSupport.deleteAll(TaskDB.class, "url=?", url);
-                    Log.d(TAG, "DownloadResult: "+"下载成功");
+                    Log.d(TAG, "DownloadResult: " + "下载成功");
                 }
-                if(result == DownloadAsyncTask.STATUS_CANCELED){
+                if (result == DownloadAsyncTask.STATUS_CANCELED) {
                     DataSupport.deleteAll(TaskDB.class, "url=?", url);
                 }
             }
@@ -54,20 +54,19 @@ public class Task {
         this.asyncTask.execute();
     }
 
-    public void pause(){
+    public void pause() {
         isDownloading = false;
         asyncTask.pauseDownload();
         asyncTask = null;
     }
 
-    public void cancel(){
+    public void cancel() {
         asyncTask.cancelDownload();
     }
 
 
-
     /**
-     *以下为自动生成的方法
+     * 以下为自动生成的方法
      */
 
     public String getUrl() {

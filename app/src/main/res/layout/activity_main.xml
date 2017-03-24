@@ -7,51 +7,28 @@
     android:padding="20dp"
     tools:context="com.example.luckychuan.downloaddemo.MainActivity">
 
-    <TextView
-        android:id="@+id/file_name"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/test"
-        android:textSize="20dp" />
-
-    <TextView
-        android:id="@+id/progress_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/test"
-        android:textSize="15dp" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:max="100"/>
+        android:layout_height="400dp"></android.support.v7.widget.RecyclerView>
 
     <Button
         android:id="@+id/new_task_btn"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/new_task" />
 
     <Button
-        android:id="@+id/start_btn"
-        android:layout_width="wrap_content"
+        android:id="@+id/new_task2_btn"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/start" />
-    <Button
-        android:id="@+id/cancel_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/cancel"
-        />
+        android:text="@string/new_task2" />
 
     <Button
         android:id="@+id/query"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/query"/>
-
+        android:text="@string/query" />
 
 
 </LinearLayout>

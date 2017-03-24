@@ -56,10 +56,9 @@ public class DownloadService extends Service {
             task.start();
         }
 
-        public void newTask(String url) {
-            Task task = new Task(url);
+        public void newTask(Task task) {
             task.start();
-            mTaskMap.put(url, task);
+            mTaskMap.put(task.getUrl(), task);
         }
 
         public void pauseDownload(String url) {
@@ -72,10 +71,6 @@ public class DownloadService extends Service {
             Log.d(TAG, "cancelDownload: ");
             mTaskMap.get(url).cancel();
             mTaskMap.remove(url);
-        }
-
-        public boolean isDownloading(String url) {
-            return mTaskMap.get(url).isDownloading();
         }
 
     }
