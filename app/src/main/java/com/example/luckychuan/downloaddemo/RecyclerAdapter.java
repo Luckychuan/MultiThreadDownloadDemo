@@ -79,7 +79,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                     Log.d(TAG, "onClick: isDownloading"+task.isDownloading());
                     if (task.isDownloading()) {
                         startButton.setText("暂停");
-                        mListener.onStartButtonClick(task.getUrl(), true);
+                       mListener.onStartButtonClick(task.getUrl(), true);
                     } else {
                         startButton.setText("开始");
                         mListener.onStartButtonClick(task.getUrl(), false);

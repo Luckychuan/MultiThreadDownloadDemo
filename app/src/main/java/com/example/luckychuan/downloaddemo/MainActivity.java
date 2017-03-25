@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //绑定Service，实现Activity和Service通信
     private DownloadService.DownloadBinder mServiceBinder;
 
-    private ArrayList<Task> mTasks;
+    private static ArrayList<Task> mTasks;
 
     private static RecyclerAdapter mAdapter;
 
@@ -126,8 +126,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mServiceBinder.newTask(task);
     }
 
-    public static void updateProgress(){
-        mAdapter.notifyDataSetChanged();
+    public static void updateProgress(String url){
+        for (int i = 0; i <mTasks.size() ; i++) {
+            Task task = mTasks.get(i);
+            if(task.getUrl().equals(url)){
+                mAdapter.notifyItemChanged(i);
+                break;
+            }
+        }
     }
 
     @Override

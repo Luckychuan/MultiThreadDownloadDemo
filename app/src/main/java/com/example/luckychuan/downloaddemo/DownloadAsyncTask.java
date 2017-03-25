@@ -103,7 +103,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
-        MainActivity.updateProgress();
+        MainActivity.updateProgress(task.getUrl());
     }
 
     public void pauseDownload() {
