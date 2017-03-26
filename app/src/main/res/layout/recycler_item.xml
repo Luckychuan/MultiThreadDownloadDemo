@@ -42,6 +42,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/cancel" />
+
+        <Button
+            android:id="@+id/open_btn"
+            android:text="@string/open"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 </LinearLayout>

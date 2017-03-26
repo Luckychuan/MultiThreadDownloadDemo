@@ -42,6 +42,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }else{
             holder.startButton.setText("开始");
         }
+
+        if(progress >= 100){
+            holder.startButton.setVisibility(View.GONE);
+            holder.cancelButton.setVisibility(View.GONE);
+            holder.openButton.setVisibility(View.VISIBLE);
+        }else{
+            holder.startButton.setVisibility(View.VISIBLE);
+            holder.cancelButton.setVisibility(View.VISIBLE);
+            holder.openButton.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -57,16 +68,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         private ProgressBar progressBar;
         private TextView progressText;
         private Button cancelButton;
+        private Button openButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
             cancelButton = ((Button) itemView.findViewById(R.id.cancel_btn));
             startButton = (Button) itemView.findViewById(R.id.start_btn);
+            openButton = (Button) itemView.findViewById(R.id.open_btn);
             fileName = (TextView) itemView.findViewById(R.id.file_name);
             progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
             progressText = (TextView) itemView.findViewById(R.id.progress_text);
             cancelButton.setOnClickListener(this);
             startButton.setOnClickListener(this);
+            openButton.setOnClickListener(this);
 
         }
 
@@ -89,9 +103,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                         mListener.onStartButtonClick(task, true);
                     }
                     break;
+
                 case R.id.cancel_btn:
                     mListener.onCancelButtonClick(task.getUrl());
                     break;
+
+                case R.id.open_btn:
+                    //// TODO: 2017/3/26
+                    break;
+
             }
         }
     }
