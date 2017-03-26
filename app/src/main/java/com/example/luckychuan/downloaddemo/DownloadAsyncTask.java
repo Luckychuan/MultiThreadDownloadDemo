@@ -1,7 +1,6 @@
 package com.example.luckychuan.downloaddemo;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.litepal.crud.DataSupport;
 

@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
@@ -66,8 +67,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        //防止进度刷新时闪烁
+        ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
         mAdapter = new RecyclerAdapter(mTasks, new RecyclerAdapter.OnItemButtonClickListener() {
             @Override
             public void onStartButtonClick(Task task, boolean toStartDownload) {
@@ -80,6 +83,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onCancelButtonClick(String url) {
+                //将Task从list中移除
+                for (int i = 0; i < mTasks.size(); i++) {
+                    if (mTasks.get(i).getUrl().equals(url)) {
+                        mTasks.remove(i);
+                        mAdapter.notifyItemRemoved(i);
+                        break;
+                    }
+                }
                 mServiceBinder.cancelDownload(url);
             }
         });
@@ -124,14 +135,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void newTask(String url) {
         Task task = new Task(url);
         mTasks.add(task);
-        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemInserted(mTasks.size() - 1);
         mServiceBinder.newTask(task);
     }
 
-    public static void updateProgress(String url){
-        for (int i = 0; i <mTasks.size() ; i++) {
+    public static void updateProgress(String url) {
+        for (int i = 0; i < mTasks.size(); i++) {
             Task task = mTasks.get(i);
-            if(task.getUrl().equals(url)){
+            if (task.getUrl().equals(url)) {
                 mAdapter.notifyItemChanged(i);
                 break;
             }
