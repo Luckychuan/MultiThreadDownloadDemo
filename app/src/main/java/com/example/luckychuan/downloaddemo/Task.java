@@ -1,5 +1,6 @@
 package com.example.luckychuan.downloaddemo;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.litepal.crud.DataSupport;
@@ -53,7 +54,8 @@ public class Task implements Serializable {
             }
         });
         this.asyncTask = asyncTask;
-        this.asyncTask.execute();
+        //实现并行下载
+        this.asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void pause() {
