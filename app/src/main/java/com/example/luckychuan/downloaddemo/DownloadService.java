@@ -7,10 +7,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.litepal.crud.DataSupport;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -24,11 +21,11 @@ public class DownloadService extends Service {
     public void onCreate() {
         super.onCreate();
         mTaskMap = new HashMap<>();
-        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-        for (TaskDB taskData : taskList) {
-            Task task = new Task(taskData.getUrl(), taskData.getName(), taskData.getContentLength(), taskData.getDownloadedLength());
-            mTaskMap.put(task.getUrl(), task);
-        }
+//        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
+//        for (TaskDB taskData : taskList) {
+//            Task task = new Task(taskData.getUrl(), taskData.getName(), taskData.getContentLength(), taskData.getDownloadedLength());
+//            mTaskMap.put(task.getUrl(), task);
+//        }
     }
 
     @Override

@@ -37,7 +37,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         holder.fileName.setText(task.getName());
         int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
         holder.showProgress(progress);
-        
+        if(task.isDownloading()){
+            holder.startButton.setText("暂停");
+        }else{
+            holder.startButton.setText("开始");
+        }
     }
 
     @Override
@@ -67,6 +71,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
 
         public void showProgress(int progress) {
+            Log.d(TAG, "showProgress: "+progress);
             progressBar.setProgress(progress);
             progressText.setText("已下载：" + progress + "%");
         }
@@ -76,13 +81,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             Task task = mTasks.get(getLayoutPosition());
             switch (v.getId()) {
                 case R.id.start_btn:
-                    Log.d(TAG, "onClick: isDownloading"+task.isDownloading());
                     if (task.isDownloading()) {
-                        startButton.setText("暂停");
-                       mListener.onStartButtonClick(task.getUrl(), true);
-                    } else {
                         startButton.setText("开始");
-                        mListener.onStartButtonClick(task.getUrl(), false);
+                       mListener.onStartButtonClick(task.getUrl(), false);
+                    } else {
+                        startButton.setText("暂停");
+                        mListener.onStartButtonClick(task.getUrl(), true);
                     }
                     break;
                 case R.id.cancel_btn:
