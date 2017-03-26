@@ -83,10 +83,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 case R.id.start_btn:
                     if (task.isDownloading()) {
                         startButton.setText("开始");
-                       mListener.onStartButtonClick(task.getUrl(), false);
+                       mListener.onStartButtonClick(task, false);
                     } else {
                         startButton.setText("暂停");
-                        mListener.onStartButtonClick(task.getUrl(), true);
+                        mListener.onStartButtonClick(task, true);
                     }
                     break;
                 case R.id.cancel_btn:
@@ -97,7 +97,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     interface OnItemButtonClickListener {
-        void onStartButtonClick(String url, boolean toStartDownload);
+        void onStartButtonClick(Task task, boolean toStartDownload);
 
         void onCancelButtonClick(String url);
     }

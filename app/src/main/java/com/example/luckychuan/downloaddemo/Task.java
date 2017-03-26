@@ -4,10 +4,12 @@ import android.util.Log;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.Serializable;
+
 /**
  * java bean类.
  */
-public class Task {
+public class Task implements Serializable {
 
     private static final String TAG = "Task";
 

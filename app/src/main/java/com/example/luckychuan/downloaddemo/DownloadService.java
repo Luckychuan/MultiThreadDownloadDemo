@@ -17,16 +17,13 @@ public class DownloadService extends Service {
     //任务列表
     private HashMap<String, Task> mTaskMap;
 
+
     @Override
     public void onCreate() {
-        super.onCreate();
         mTaskMap = new HashMap<>();
-//        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-//        for (TaskDB taskData : taskList) {
-//            Task task = new Task(taskData.getUrl(), taskData.getName(), taskData.getContentLength(), taskData.getDownloadedLength());
-//            mTaskMap.put(task.getUrl(), task);
-//        }
+        super.onCreate();
     }
+
 
     @Override
     public void onDestroy() {
@@ -44,12 +41,20 @@ public class DownloadService extends Service {
 
     class DownloadBinder extends Binder {
 
-        /**
-         * @param url 通过url从map里找到需要下载的任务
-         */
-        public void startDownload(String url) {
-            Log.d(TAG, "startDownload: " + url);
-            Task task = mTaskMap.get(url);
+
+        public void startDownload(Task task) {
+            //用于判断map里是否有相同的任务
+            boolean isContain = false;
+            for (Map.Entry<String, Task> entry : mTaskMap.entrySet()) {
+                //map里面已经有相同的任务
+                if(entry.getValue().getUrl().equals(task.getUrl())){
+                    isContain = true;
+                    break;
+                }
+            }
+            if(!isContain){
+                mTaskMap.put(task.getUrl(),task);
+            }
             task.start();
         }
 

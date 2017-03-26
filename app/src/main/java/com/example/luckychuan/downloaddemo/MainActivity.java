@@ -70,11 +70,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new RecyclerAdapter(mTasks, new RecyclerAdapter.OnItemButtonClickListener() {
             @Override
-            public void onStartButtonClick(String url, boolean toStartDownload) {
+            public void onStartButtonClick(Task task, boolean toStartDownload) {
                 if (toStartDownload) {
-                    mServiceBinder.startDownload(url);
+                    mServiceBinder.startDownload(task);
                 } else {
-                    mServiceBinder.pauseDownload(url);
+                    mServiceBinder.pauseDownload(task.getUrl());
                 }
             }
 
