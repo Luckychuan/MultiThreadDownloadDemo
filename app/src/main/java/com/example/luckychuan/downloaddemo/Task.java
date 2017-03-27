@@ -46,10 +46,12 @@ public class Task implements Serializable {
             public void DownloadResult(int result) {
                 if (result == DownloadAsyncTask.STATUS_SUCCEED) {
                     DataSupport.deleteAll(TaskDB.class, "url=?", url);
-                    Log.d(TAG, "DownloadResult: " + "下载成功");
-                }
-                if (result == DownloadAsyncTask.STATUS_CANCELED) {
+                    Log.d("Result", "DownloadResult: " + "下载成功");
+                }else if(result == DownloadAsyncTask.STATUS_CANCELED) {
                     DataSupport.deleteAll(TaskDB.class, "url=?", url);
+                    Log.d("Result", "DownloadResult: 取消");
+                }else if(result == DownloadAsyncTask.STATUS_FAILED){
+                    Log.d("Result", "DownloadResult: 失败");
                 }
             }
         });

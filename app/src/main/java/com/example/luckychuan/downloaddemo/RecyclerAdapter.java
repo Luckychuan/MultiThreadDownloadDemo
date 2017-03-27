@@ -1,5 +1,6 @@
 package com.example.luckychuan.downloaddemo;
 
+import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -35,7 +37,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         Task task = mTasks.get(position);
         holder.fileName.setText(task.getName());
-        int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
+        int progress =0;
+        if(task.getContentLength() != 0){
+            progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
+        }
         holder.showProgress(progress);
         if(task.isDownloading()){
             holder.startButton.setText("暂停");
@@ -109,7 +114,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                     break;
 
                 case R.id.open_btn:
-                    //// TODO: 2017/3/26
+                    String directory = Environment.getExternalStorageDirectory().getAbsolutePath();
+                    File file =new File(directory+task.getName());
+                    if (!file.exists()){
+
+                    }
                     break;
 
             }
