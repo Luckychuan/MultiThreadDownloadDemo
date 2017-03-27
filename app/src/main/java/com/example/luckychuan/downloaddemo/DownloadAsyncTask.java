@@ -152,7 +152,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
             taskDB.setDownloadedLength(task.getDownloadedLength());
             taskDB.updateAll("url=?", task.getUrl());
         }
-        return STATUS_SUCCEED;
+        return mStatus;
     }
 
     private long getContentLength(String url) {

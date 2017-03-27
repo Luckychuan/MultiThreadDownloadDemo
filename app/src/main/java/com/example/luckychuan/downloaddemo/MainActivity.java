@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
 
-    private static final String URL1 = "http://dlc2.pconline.com.cn/filedown_359520_8385606/i07dhgl9/pconline1489579266337.apk";
+    private static final String URL1 = "http://m.down.sandai.net/MobileThunder/Android_5.34.2.4700/XLWXguanwang.apk";
     private static final String URL2 = "http://s1.music.126.net/download/android/CloudMusic_official_4.0.0_179175.apk";
 
     //绑定Service，实现Activity和Service通信
