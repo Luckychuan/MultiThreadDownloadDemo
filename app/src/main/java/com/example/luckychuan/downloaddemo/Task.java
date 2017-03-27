@@ -1,10 +1,12 @@
 package com.example.luckychuan.downloaddemo;
 
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -45,10 +47,8 @@ public class Task implements Serializable {
             @Override
             public void DownloadResult(int result) {
                 if (result == DownloadAsyncTask.STATUS_SUCCEED) {
-                    DataSupport.deleteAll(TaskDB.class, "url=?", url);
                     Log.d("Result", "DownloadResult: " + "下载成功");
                 }else if(result == DownloadAsyncTask.STATUS_CANCELED) {
-                    DataSupport.deleteAll(TaskDB.class, "url=?", url);
                     Log.d("Result", "DownloadResult: 取消");
                 }else if(result == DownloadAsyncTask.STATUS_FAILED){
                     Log.d("Result", "DownloadResult: 失败");
@@ -67,7 +67,16 @@ public class Task implements Serializable {
     }
 
     public void cancel() {
-        asyncTask.cancelDownload();
+        if(asyncTask !=null ){
+            asyncTask.cancelDownload();
+        }else{
+            String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+            File file = new File(directory + name);
+            if (file.exists()){
+                file.delete();
+            }
+        }
+        DataSupport.deleteAll(TaskDB.class, "url=?", url);
     }
 
 
