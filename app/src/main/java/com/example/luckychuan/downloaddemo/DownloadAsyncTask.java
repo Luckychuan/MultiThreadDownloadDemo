@@ -145,7 +145,13 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
             }
         }
 
-        mStatus = STATUS_SUCCEED;
+        if(task.getDownloadedLength()>=task.getContentLength()){
+            mStatus = STATUS_SUCCEED;
+            //更新进度到数据库中
+            TaskDB taskDB = new TaskDB();
+            taskDB.setDownloadedLength(task.getDownloadedLength());
+            taskDB.updateAll("url=?", task.getUrl());
+        }
         return STATUS_SUCCEED;
     }
 
