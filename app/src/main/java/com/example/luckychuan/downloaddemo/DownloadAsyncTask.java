@@ -25,11 +25,11 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     private static final String TAG = "DownloadAsyncTask";
 
     private int mStatus;
-    public static final int STATUS_DOWNLOADING = 0;
-    public static final int STATUS_SUCCEED = 1;
-    public static final int STATUS_PAUSED = 2;
-    public static final int STATUS_CANCELED = 3;
-    public static final int STATUS_FAILED = 4;
+    private static final int STATUS_DOWNLOADING = 0;
+    private static final int STATUS_SUCCEED = 1;
+    private static final int STATUS_PAUSED = 2;
+    private static final int STATUS_CANCELED = 3;
+    private static final int STATUS_FAILED = 4;
 
 
     private Task task;

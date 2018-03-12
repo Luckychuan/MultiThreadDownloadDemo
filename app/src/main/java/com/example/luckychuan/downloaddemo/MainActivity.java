@@ -27,18 +27,17 @@ import org.litepal.tablemanager.Connector;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements DownloadView {
 
     private static final String TAG = "MainActivity";
-
     private static final String URL1 = "http://m.down.sandai.net/MobileThunder/Android_5.34.2.4700/XLWXguanwang.apk";
     private static final String URL2 = "http://s1.music.126.net/download/android/CloudMusic_official_4.0.0_179175.apk";
 
     //绑定Service，实现Activity和Service通信
     private DownloadService.DownloadBinder mServiceBinder;
 
-    private static ArrayList<Task> mTasks;
-
+    //RecyclerView的数据源
+    private static ArrayList<Task> mTasks = new ArrayList<>();;
     private static RecyclerAdapter mAdapter;
 
 
@@ -46,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mServiceBinder = (DownloadService.DownloadBinder) service;
+            mServiceBinder.setDownloadView(MainActivity.this);
         }
 
         @Override
@@ -97,18 +97,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void afterPermissionGranted() {
-        ((Button) findViewById(R.id.new_task_btn)).setOnClickListener(this);
-        ((Button) findViewById(R.id.new_task2_btn)).setOnClickListener(this);
-        ((Button) findViewById(R.id.query)).setOnClickListener(this);
+//        ((Button) findViewById(R.id.new_task_btn)).setOnClickListener(this);
+//        ((Button) findViewById(R.id.new_task2_btn)).setOnClickListener(this);
+//        ((Button) findViewById(R.id.query)).setOnClickListener(this);
 
-        mTasks = new ArrayList<>();
-        //从数据库中获取数据
-        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-        if (taskList.size() != 0) {
-            for (TaskDB taskDB : taskList) {
-                mTasks.add(new Task(taskDB.getUrl(), taskDB.getName(), taskDB.getContentLength(), taskDB.getDownloadedLength()));
-            }
-        }
+//        //从数据库中获取数据
+//        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
+//        if (taskList.size() != 0) {
+//            for (TaskDB taskDB : taskList) {
+//                mTasks.add(new Task(taskDB.getUrl(), taskDB.getName(), taskDB.getContentLength(), taskDB.getDownloadedLength()));
+//            }
+//        }
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -140,8 +139,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         recyclerView.setAdapter(mAdapter);
 
-        //创建LitePal数据库
-        Connector.getDatabase();
+//        //创建LitePal数据库
+//        Connector.getDatabase();
 
         //绑定Service
         Intent serviceIntent = new Intent(this, DownloadService.class);
@@ -150,54 +149,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.new_task_btn:
-                newTask(URL1);
-                break;
+//    @Override
+//    public void onClick(View v) {
+//        switch (v.getId()) {
+//            case R.id.new_task_btn:
+//                newTask(URL1);
+//                break;
+//
+//            case R.id.new_task2_btn:
+//                newTask(URL2);
+//                break;
+//
+//            case R.id.query:
+//                List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
+//                if (taskList.size() == 0) {
+//                    Log.d(TAG, "onClick: 无数据");
+//                }
+//                for (TaskDB t : taskList) {
+//                    Log.d(TAG, "onClick: " + t.getUrl());
+//                    Log.d(TAG, "onClick: " + t.getName());
+//                    Log.d(TAG, "onClick: " + t.getDownloadedLength());
+//                    Log.d(TAG, "onClick: " + t.getContentLength());
+//                }
+//                break;
+//        }
+//    }
 
-            case R.id.new_task2_btn:
-                newTask(URL2);
-                break;
+//    private void newTask(String url) {
+//        for (Task t : mTasks) {
+//            if (t.getUrl().equals(url)) {
+//                Toast.makeText(MainActivity.this, "任务已经存在", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//        }
+//        Task task = new Task(url);
+//        mTasks.add(task);
+//        mAdapter.notifyItemInserted(mTasks.size() - 1);
+//        mServiceBinder.newTask(task);
+//    }
 
-            case R.id.query:
-                List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-                if (taskList.size() == 0) {
-                    Log.d(TAG, "onClick: 无数据");
-                }
-                for (TaskDB t : taskList) {
-                    Log.d(TAG, "onClick: " + t.getUrl());
-                    Log.d(TAG, "onClick: " + t.getName());
-                    Log.d(TAG, "onClick: " + t.getDownloadedLength());
-                    Log.d(TAG, "onClick: " + t.getContentLength());
-                }
-                break;
-        }
-    }
-
-    private void newTask(String url) {
-        for (Task t : mTasks) {
-            if (t.getUrl().equals(url)) {
-                Toast.makeText(MainActivity.this, "任务已经存在", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
-        Task task = new Task(url);
-        mTasks.add(task);
-        mAdapter.notifyItemInserted(mTasks.size() - 1);
-        mServiceBinder.newTask(task);
-    }
-
-    public static void updateProgress(String url) {
-        for (int i = 0; i < mTasks.size(); i++) {
-            Task task = mTasks.get(i);
-            if (task.getUrl().equals(url)) {
-                mAdapter.notifyItemChanged(i);
-                break;
-            }
-        }
-    }
 
     @Override
     protected void onDestroy() {
@@ -207,4 +197,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    private int getPosition(String url) {
+        for (int i = 0; i < mTasks.size(); i++) {
+            Task task = mTasks.get(i);
+            if(url.equals(task.getUrl())){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public void onInitFinish(String url, String name,long contentLength) {
+        Task task = new Task(url,name,contentLength);
+        mTasks.add(task);
+        mAdapter.notifyItemInserted(mTasks.size()-1);
+    }
+
+    @Override
+    public void onDownloadStart(String url) {
+        int position = getPosition(url);
+        Task task = mTasks.get(position);
+        task.setDownloading(true);
+        mAdapter.notifyItemChanged(position,false);
+    }
+
+    @Override
+    public void onDownloadPause(String url) {
+        int position = getPosition(url);
+        Task task = mTasks.get(position);
+        task.setDownloading(false);
+        mAdapter.notifyItemChanged(position,false);
+    }
+
+    @Override
+    public void updateProgress(String url, long downloadedLength) {
+        int position = getPosition(url);
+        Task task = mTasks.get(position);
+        task.setDownloadedLength(downloadedLength);
+        mAdapter.notifyItemChanged(position,false);
+    }
+
+    @Override
+    public void onFail(String url) {
+        int position = getPosition(url);
+        Task task = mTasks.get(position);
+        task.setContentLength(0);
+        mAdapter.notifyItemChanged(position,false);
+    }
+
+    @Override
+    public void onCancel(String url) {
+        int position = getPosition(url);
+        mAdapter.notifyItemRemoved(position);
+        mTasks.remove(position);
+    }
 }

@@ -2,6 +2,7 @@ package com.example.luckychuan.downloaddemo;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -41,6 +42,12 @@ public class DownloadService extends Service {
 
     class DownloadBinder extends Binder {
 
+        private DownloadView mView;
+
+        public void setDownloadView(DownloadView view){
+            mView = view;
+        }
+
 
         public void startDownload(Task task) {
             //用于判断map里是否有相同的任务
@@ -74,6 +81,7 @@ public class DownloadService extends Service {
             mTaskMap.get(url).cancel();
             mTaskMap.remove(url);
         }
+
 
     }
 

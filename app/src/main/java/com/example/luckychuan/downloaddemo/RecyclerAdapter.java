@@ -36,19 +36,31 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Task task = mTasks.get(position);
+
+        //初始化
         holder.fileName.setText(task.getName());
-        int progress =0;
+        holder.progressBar.setProgress(0);
+
+        //更新进度
         if(task.getContentLength() != 0){
-            progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
+            int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
+            holder.progressBar.setProgress(progress);
+            holder.progressText.setText("已下载：" + progress + "%");
+        }else {
+            //当下载失败时
+            holder.progressBar.setProgress(0);
+            holder.progressText.setText("下载失败");
         }
-        holder.showProgress(progress);
+
+        //更新下载状态
         if(task.isDownloading()){
             holder.startButton.setText("暂停");
         }else{
             holder.startButton.setText("开始");
         }
 
-        if(progress >= 100){
+        //下载完成时
+        if(task.getDownloadedLength() >= task.getContentLength()){
             holder.startButton.setVisibility(View.GONE);
             holder.cancelButton.setVisibility(View.GONE);
             holder.openButton.setVisibility(View.VISIBLE);
@@ -75,7 +87,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         private Button cancelButton;
         private Button openButton;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             cancelButton = ((Button) itemView.findViewById(R.id.cancel_btn));
             startButton = (Button) itemView.findViewById(R.id.start_btn);
@@ -87,12 +99,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             startButton.setOnClickListener(this);
             openButton.setOnClickListener(this);
 
-        }
-
-        public void showProgress(int progress) {
-            Log.d(TAG, "showProgress: "+progress);
-            progressBar.setProgress(progress);
-            progressText.setText("已下载：" + progress + "%");
         }
 
         @Override

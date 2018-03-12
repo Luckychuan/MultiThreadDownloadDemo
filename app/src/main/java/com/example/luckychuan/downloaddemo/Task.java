@@ -24,10 +24,16 @@ public class Task implements Serializable {
     private long downloadedLength;
     //下载的线程
     private DownloadAsyncTask asyncTask;
+
+
+
     private boolean isDownloading;
 
-    public Task(String url) {
+    public Task(String url,String name,long contentLength) {
         this.url = url;
+        this.name = name;
+        this.downloadedLength = 0;
+        this.contentLength = contentLength;
     }
 
     public Task(String url, String name, long contentLength, long downloadedLength) {
@@ -39,6 +45,10 @@ public class Task implements Serializable {
 
     public boolean isDownloading() {
         return isDownloading;
+    }
+
+    public void setDownloading(boolean downloading) {
+        isDownloading = downloading;
     }
 
     public void start() {

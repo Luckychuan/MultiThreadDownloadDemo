@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DownloadDemo.iml" filepath="$PROJECT_DIR$/DownloadDemo.iml" />
+      <module fileurl="file://C:\AndroidStudioProjects\MultiThreadDownloadDemo\DownloadDemo.iml" filepath="C:\AndroidStudioProjects\MultiThreadDownloadDemo\DownloadDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MultiThreadDownloadDemo.iml" filepath="$PROJECT_DIR$/MultiThreadDownloadDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\AndroidStudioProjects\MultiThreadDownloadDemo\app\app.iml" filepath="C:\AndroidStudioProjects\MultiThreadDownloadDemo\app\app.iml" />
     </modules>
   </component>
 </project>
