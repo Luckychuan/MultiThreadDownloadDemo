@@ -27,20 +27,18 @@ import org.litepal.tablemanager.Connector;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements DownloadView {
+public class MainActivity extends AppCompatActivity implements DownloadView, RecyclerAdapter.OnItemButtonClickListener {
 
     private static final String TAG = "MainActivity";
     private static final String URL1 = "http://m.down.sandai.net/MobileThunder/Android_5.34.2.4700/XLWXguanwang.apk";
     private static final String URL2 = "http://s1.music.126.net/download/android/CloudMusic_official_4.0.0_179175.apk";
 
-    //绑定Service，实现Activity和Service通信
-    private DownloadService.DownloadBinder mServiceBinder;
-
     //RecyclerView的数据源
     private static ArrayList<Task> mTasks = new ArrayList<>();;
     private static RecyclerAdapter mAdapter;
 
-
+    //绑定Service，实现Activity和Service通信
+    private DownloadService.DownloadBinder mServiceBinder;
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -54,10 +52,21 @@ public class MainActivity extends AppCompatActivity implements DownloadView {
         }
     };
 
+
+
+    /**
+     * 以下为获取读写权限，建立Activity与Service通信连接,初始化UI部分
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //绑定Service
+        Intent serviceIntent = new Intent(this, DownloadService.class);
+        startService(serviceIntent);
+        bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
 
         //获取权限
         int readStorageCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -70,13 +79,20 @@ public class MainActivity extends AppCompatActivity implements DownloadView {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
+        stopService(new Intent(this, DownloadService.class));
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         //当权限获得时
         if (grantResults.length > 0 &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            afterPermissionGranted();
+            initUI();
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 //弹出对话框提示用户接收权限
@@ -95,12 +111,7 @@ public class MainActivity extends AppCompatActivity implements DownloadView {
         }
     }
 
-
-    private void afterPermissionGranted() {
-//        ((Button) findViewById(R.id.new_task_btn)).setOnClickListener(this);
-//        ((Button) findViewById(R.id.new_task2_btn)).setOnClickListener(this);
-//        ((Button) findViewById(R.id.query)).setOnClickListener(this);
-
+    private void initUI() {
 //        //从数据库中获取数据
 //        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
 //        if (taskList.size() != 0) {
@@ -109,44 +120,51 @@ public class MainActivity extends AppCompatActivity implements DownloadView {
 //            }
 //        }
 
+        //        //创建LitePal数据库
+//        Connector.getDatabase();
+        // TODO: 2018/3/12
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         //防止进度刷新时闪烁
         ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
-        mAdapter = new RecyclerAdapter(mTasks, new RecyclerAdapter.OnItemButtonClickListener() {
-            @Override
-            public void onStartButtonClick(Task task, boolean toStartDownload) {
-                if (toStartDownload) {
-                    mServiceBinder.startDownload(task);
-                } else {
-                    mServiceBinder.pauseDownload(task.getUrl());
-                }
-            }
-
-            @Override
-            public void onCancelButtonClick(String url) {
-                //将Task从list中移除
-                for (int i = 0; i < mTasks.size(); i++) {
-                    if (mTasks.get(i).getUrl().equals(url)) {
-                        mTasks.remove(i);
-                        mAdapter.notifyItemRemoved(i);
-                        break;
-                    }
-                }
-                mServiceBinder.cancelDownload(url);
-            }
-        });
+        mAdapter = new RecyclerAdapter(mTasks, this);
         recyclerView.setAdapter(mAdapter);
-
-//        //创建LitePal数据库
-//        Connector.getDatabase();
-
-        //绑定Service
-        Intent serviceIntent = new Intent(this, DownloadService.class);
-        startService(serviceIntent);
-        bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
     }
+
+
+
+    /**
+     *  以下为UI操控逻辑部分
+     *
+     */
+
+    private void newTask(String url) {
+        //判断任务是否已经存在
+        for (Task t : mTasks) {
+            if (t.getUrl().equals(url)) {
+                Toast.makeText(MainActivity.this, "任务已经存在", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        mServiceBinder.newTask(url);
+    }
+
+    @Override
+    public void onStartButtonClick(Task task, boolean toStartDownload) {
+        if (toStartDownload) {
+            mServiceBinder.startDownload(task.getUrl());
+        } else {
+            mServiceBinder.pauseDownload(task.getUrl());
+        }
+    }
+
+    @Override
+    public void onCancelButtonClick(String url) {
+        mServiceBinder.cancelDownload(url);
+    }
+
 
 
 //    @Override
@@ -175,38 +193,13 @@ public class MainActivity extends AppCompatActivity implements DownloadView {
 //        }
 //    }
 
-//    private void newTask(String url) {
-//        for (Task t : mTasks) {
-//            if (t.getUrl().equals(url)) {
-//                Toast.makeText(MainActivity.this, "任务已经存在", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//        }
-//        Task task = new Task(url);
-//        mTasks.add(task);
-//        mAdapter.notifyItemInserted(mTasks.size() - 1);
-//        mServiceBinder.newTask(task);
-//    }
 
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(mConnection);
-        stopService(new Intent(this, DownloadService.class));
-    }
-
-
-    private int getPosition(String url) {
-        for (int i = 0; i < mTasks.size(); i++) {
-            Task task = mTasks.get(i);
-            if(url.equals(task.getUrl())){
-                return i;
-            }
-        }
-        return -1;
-    }
-
+    /**
+     * 以下为逻辑模块回调更新UI
+     * @param url
+     * @param name
+     * @param contentLength
+     */
     @Override
     public void onInitFinish(String url, String name,long contentLength) {
         Task task = new Task(url,name,contentLength);
@@ -252,4 +245,21 @@ public class MainActivity extends AppCompatActivity implements DownloadView {
         mAdapter.notifyItemRemoved(position);
         mTasks.remove(position);
     }
+
+    /**
+     * 通过url找到当前task在list的position
+     * @param url
+     * @return
+     */
+    private int getPosition(String url) {
+        for (int i = 0; i < mTasks.size(); i++) {
+            Task task = mTasks.get(i);
+            if(url.equals(task.getUrl())){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
 }
