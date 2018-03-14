@@ -12,17 +12,17 @@ import java.util.HashMap;
 
 public class DownloadManager implements DownloadModel {
 
-    private HashMap<String,DownloadAsyncTask> mMap = new HashMap<>();
+    private HashMap<String, DownloadAsyncTask> mMap = new HashMap<>();
     private DownloadView mView;
 
-    public DownloadManager(DownloadView view){
+    public DownloadManager(DownloadView view) {
         mView = view;
     }
 
 
     @Override
     public void newTask(final String url) {
-         DownloadAsyncTask asyncTask = new DownloadAsyncTask(url, new DownloadAsyncTask.DownLoadListener() {
+        DownloadAsyncTask asyncTask = new DownloadAsyncTask(url, new DownloadAsyncTask.DownLoadListener() {
             @Override
             public void onInitFinish(String name, long contentLength) {
                 // TODO: 2018/3/14 数据库，insert
@@ -31,7 +31,7 @@ public class DownloadManager implements DownloadModel {
 //                taskDB.setName(name);
 //                taskDB.setDownloadedLength(0);
 //                taskDB.save();
-                mView.onInitFinish(url,name,contentLength);
+                mView.onInitFinish(url, name, contentLength);
             }
 
             @Override
@@ -46,7 +46,7 @@ public class DownloadManager implements DownloadModel {
 
             @Override
             public void updateProgress(long downloadedLength) {
-                mView.updateProgress(url,downloadedLength);
+                mView.updateProgress(url, downloadedLength);
             }
 
             @Override
@@ -65,19 +65,27 @@ public class DownloadManager implements DownloadModel {
                 if (file.exists()) {
                     isDeleted = file.delete();
                 }
-                if(isDeleted){
+                if (isDeleted) {
                     mView.onCancel(url);
                 }
             }
+
+            @Override
+            public void onFinish() {
+                mMap.remove(url);
+                // TODO: 2018/3/14 数据库操作
+                //        DataSupport.deleteAll(TaskDB.class, "url=?", url);
+
+            }
         });
-        mMap.put(url,asyncTask);
+        mMap.put(url, asyncTask);
         //实现多任务下载,开始任务
         asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
 
     @Override
-    public void startDownload(String url,long downloadedLength,long contentLength) {
+    public void startDownload(String url, long downloadedLength, long contentLength) {
         mMap.get(url).execute();
     }
 

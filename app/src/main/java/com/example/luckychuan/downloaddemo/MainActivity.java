@@ -246,6 +246,12 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
         mTasks.remove(position);
     }
 
+    @Override
+    public void onSuccess(String url) {
+        int position = getPosition(url);
+        mAdapter.notifyItemChanged(position);
+    }
+
     /**
      * 通过url找到当前task在list的position
      * @param url

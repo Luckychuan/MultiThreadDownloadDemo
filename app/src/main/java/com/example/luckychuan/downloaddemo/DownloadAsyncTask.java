@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -194,6 +193,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         void updateProgress(long downloadedLength);
         void onFail();
         void onCancel(String name);
+        void onFinish();
     }
 
 }

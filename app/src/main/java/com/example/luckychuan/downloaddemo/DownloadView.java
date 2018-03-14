@@ -18,4 +18,6 @@ public interface DownloadView {
 
     void onCancel(String url);
 
+    void onSuccess(String url);
+
 }
