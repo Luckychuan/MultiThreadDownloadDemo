@@ -22,26 +22,16 @@ public class Task implements Serializable {
     private long contentLength;
     //已下载大小
     private long downloadedLength;
-    //下载的线程
-    private DownloadAsyncTask asyncTask;
-
-
 
     private boolean isDownloading;
 
-    public Task(String url,String name,long contentLength) {
+    public Task(String url, String name, long contentLength) {
         this.url = url;
         this.name = name;
         this.downloadedLength = 0;
         this.contentLength = contentLength;
     }
 
-    public Task(String url, String name, long contentLength, long downloadedLength) {
-        this.url = url;
-        this.name = name;
-        this.contentLength = contentLength;
-        this.downloadedLength = downloadedLength;
-    }
 
     public boolean isDownloading() {
         return isDownloading;
@@ -58,36 +48,17 @@ public class Task implements Serializable {
             public void DownloadResult(int result) {
                 if (result == DownloadAsyncTask.STATUS_SUCCEED) {
                     Log.d("Result", "DownloadResult: " + "下载成功");
-                }else if(result == DownloadAsyncTask.STATUS_CANCELED) {
+                } else if (result == DownloadAsyncTask.STATUS_CANCELED) {
                     Log.d("Result", "DownloadResult: 取消");
-                }else if(result == DownloadAsyncTask.STATUS_FAILED){
+                } else if (result == DownloadAsyncTask.STATUS_FAILED) {
                     Log.d("Result", "DownloadResult: 失败");
                 }
             }
         });
         this.asyncTask = asyncTask;
-        //实现并行下载
-        this.asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
     }
 
-    public void pause() {
-        isDownloading = false;
-        asyncTask.pauseDownload();
-        asyncTask = null;
-    }
-
-    public void cancel() {
-        if(asyncTask !=null ){
-            asyncTask.cancelDownload();
-        }else{
-            String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-            File file = new File(directory + name);
-            if (file.exists()){
-                file.delete();
-            }
-        }
-        DataSupport.deleteAll(TaskDB.class, "url=?", url);
-    }
 
 
     /**

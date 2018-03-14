@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
     @Override
     public void onStartButtonClick(Task task, boolean toStartDownload) {
         if (toStartDownload) {
-            mServiceBinder.startDownload(task.getUrl());
+            mServiceBinder.startDownload(task.getUrl(),task.getDownloadedLength(),task.getContentLength());
         } else {
             mServiceBinder.pauseDownload(task.getUrl());
         }

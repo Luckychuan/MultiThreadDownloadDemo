@@ -32,11 +32,13 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     private static final int STATUS_FAILED = 4;
 
 
-    private Task task;
+    private String mUrl;
+    private long mDownloadedLength;
+    private long mContentLength;
 
-    private DownloadListener mListener;
+    private DownLoadListener mListener;
 
-    public DownloadAsyncTask(Task t, DownloadListener listener) {
+    public DownloadAsyncTask(String url,DownLoadListener listener) {
         mListener = listener;
 
         task = t;
@@ -44,22 +46,12 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         String name = url.substring(url.lastIndexOf("/") + 1);
         task.setName(name);
 
-        //判断任务是否已经创建到数据库中
-        List<TaskDB> taskList = DataSupport.where("url=?", url).find(TaskDB.class);
-        if (taskList.size() == 0) {
 
-            TaskDB taskDB = new TaskDB();
-            taskDB.setUrl(url);
-            taskDB.setName(name);
-            taskDB.setDownloadedLength(0);
-            taskDB.save();
 
-        } else {
-            TaskDB taskDB = taskList.get(0);
-            task.setDownloadedLength(taskDB.getDownloadedLength());
-            task.setContentLength(taskDB.getContentLength());
-        }
+    }
 
+    public String geturl() {
+        return mUrl;
     }
 
     @Override
@@ -186,19 +178,22 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         MainActivity.updateProgress(task.getUrl());
     }
 
-    public void pauseDownload() {
+    public void setPause() {
         mStatus = STATUS_PAUSED;
-        mListener.DownloadResult(STATUS_PAUSED);
     }
 
-    public void cancelDownload() {
+    public void setCancel() {
         mStatus = STATUS_CANCELED;
-        mListener.DownloadResult(STATUS_CANCELED);
     }
 
-    interface DownloadListener {
-        void DownloadResult(int result);
-    }
 
+    interface DownLoadListener{
+        void onInitFinish(String name,long contentLength);
+        void onDownloadStart();
+        void onDownloadPause();
+        void updateProgress(long downloadedLength);
+        void onFail();
+        void onCancel(String name);
+    }
 
 }
