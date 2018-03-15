@@ -1,6 +1,7 @@
 package com.example.luckychuan.downloaddemo;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -19,18 +20,8 @@ public class DownloadManager implements DownloadModel {
 
 
     @Override
-    public void newTask(final String url) {
+    public void addDownloadTask(final String url) {
         DownloadAsyncTask asyncTask = new DownloadAsyncTask(new DownloadAsyncTask.DownLoadListener() {
-            @Override
-            public void onInitFinish(String name) {
-                // TODO: 2018/3/14 数据库，insert
-//                TaskDB taskDB = new TaskDB();
-//                taskDB.setUrl(url);
-//                taskDB.setName(name);
-//                taskDB.setDownloadedLength(0);
-//                taskDB.save();
-                mView.onInitFinish(url, name);
-            }
 
             @Override
             public void onDownloadStart() {
@@ -39,16 +30,18 @@ public class DownloadManager implements DownloadModel {
 
             @Override
             public void onDownloadPause() {
+                mMap.remove(url);
                 mView.onDownloadPause(url);
             }
 
             @Override
             public void updateProgress(int progress) {
-                mView.updateProgress(url,progress);
+                mView.updateProgress(url, progress);
             }
 
             @Override
             public void onFail() {
+                mMap.remove(url);
                 mView.onFail(url);
             }
 
@@ -71,13 +64,7 @@ public class DownloadManager implements DownloadModel {
         });
         mMap.put(url, asyncTask);
         //实现多任务下载,开始任务
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-    }
-
-    @Override
-    public void startDownload(String url) {
-        mMap.get(url).execute();
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
     }
 
     @Override
@@ -87,6 +74,11 @@ public class DownloadManager implements DownloadModel {
 
     @Override
     public void cancelDownload(String url) {
+        DownloadAsyncTask task = mMap.get(url);
+        if (task == null) {
+            addDownloadTask(url);
+            Log.d("cancel", "cancelDownload: ");
+        }
         mMap.get(url).setCancel();
     }
 

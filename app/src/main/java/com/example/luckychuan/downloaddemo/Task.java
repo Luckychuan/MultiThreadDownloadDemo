@@ -16,8 +16,8 @@ public class Task implements Serializable {
     public Task(String url, String name) {
         this.url = url;
         this.name = name;
+        isDownloading = true;
     }
-
 
 
     /**

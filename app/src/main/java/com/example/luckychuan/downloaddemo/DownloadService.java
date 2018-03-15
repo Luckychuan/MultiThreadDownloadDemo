@@ -10,6 +10,8 @@ import android.support.annotation.Nullable;
 
 public class DownloadService extends Service {
 
+    private DownloadManager mManager;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -22,25 +24,23 @@ public class DownloadService extends Service {
 
         public void setDownloadView(DownloadView view){
             mView = view;
+            mManager = new DownloadManager(mView);
         }
 
 
 
-        public void newTask(String url) {
-            // TODO: 2018/3/12 新建任务
 
-        }
 
         public void startDownload(String url) {
-            // TODO: 2018/3/14
+            mManager.addDownloadTask(url);
         }
 
         public void pauseDownload(String url) {
-            // TODO: 2018/3/14
+            mManager.pauseDownload(url);
         }
 
         public void cancelDownload(String url) {
-            // TODO: 2018/3/14
+            mManager.cancelDownload(url);
         }
 
 

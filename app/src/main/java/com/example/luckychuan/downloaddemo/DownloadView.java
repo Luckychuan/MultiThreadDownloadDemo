@@ -6,8 +6,6 @@ package com.example.luckychuan.downloaddemo;
 
 public interface DownloadView {
 
-    void onInitFinish(String url,String name);
-
     void onDownloadStart(String url);
 
     void onDownloadPause(String url);
@@ -17,7 +15,5 @@ public interface DownloadView {
     void onFail(String url);
 
     void onCancel(String url);
-
-    void onSuccess(String url);
 
 }

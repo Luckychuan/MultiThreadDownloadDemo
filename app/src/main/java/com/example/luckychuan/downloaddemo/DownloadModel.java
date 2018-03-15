@@ -6,8 +6,7 @@ package com.example.luckychuan.downloaddemo;
 
 public interface DownloadModel {
 
-    void newTask(String url);
-    void startDownload(String url);
+    void addDownloadTask(String url);
     void pauseDownload(String url);
     void cancelDownload(String url);
     void saveProgress(long downloadedLength);

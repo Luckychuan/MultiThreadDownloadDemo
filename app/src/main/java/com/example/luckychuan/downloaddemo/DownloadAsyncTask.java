@@ -37,22 +37,33 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     }
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        mListener.onDownloadStart();
+    }
+
+    @Override
     protected Integer doInBackground(String... params) {
         String url = params[0];
         String name = url.substring(url.lastIndexOf("/"));
-        long downloadedLength = 0;
-        long contentLength = getContentLength(url);
 
+        long downloadedLength = 0;
         String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
         File file = new File(directory + name);
 
-        //判断是新任务
-        if (file.exists()) {
-            downloadedLength = file.length();
-        } else {
-            mListener.onInitFinish(name);
+        //判断任务是开始还是取消
+        if(isCancel){
+            if(file.exists()){
+                file.delete();
+            }
+            return STATUS_CANCELED;
         }
 
+        if(file.exists()){
+            downloadedLength = file.length();
+        }
+
+        long contentLength = getContentLength(url);
         //无法下载
         if (contentLength == 0) {
             return STATUS_FAILED;
@@ -63,7 +74,6 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
         //开始下载
         isPause = false;
         isCancel = false;
-        mListener.onDownloadStart();
 
         InputStream is = null;
         RandomAccessFile saveFile = null;
@@ -85,7 +95,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
                     if (isPause) {
                         return STATUS_PAUSED;
                     } else if (isCancel) {
-                        if (file.exists()) {
+                        if(file.exists()){
                             file.delete();
                         }
                         return STATUS_CANCELED;
@@ -98,8 +108,6 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
                 }
 
                 response.body().close();
-            } else {
-                Log.d(TAG, "doInBackground:  response null");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -120,7 +128,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
         if (contentLength == downloadedLength) {
             return STATUS_SUCCEED;
         }
-        return 0;
+        return STATUS_FAILED;
     }
 
     private long getContentLength(String url) {
@@ -174,9 +182,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
         isCancel = true;
     }
 
-
-    interface DownLoadListener {
-        void onInitFinish(String name);
+    public interface DownLoadListener {
 
         void onDownloadStart();
 

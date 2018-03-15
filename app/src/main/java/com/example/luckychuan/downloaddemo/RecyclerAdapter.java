@@ -45,10 +45,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         if (task.getProgress() != -1) {
             holder.progressBar.setProgress(task.getProgress());
             holder.progressText.setText("已下载：" + task.getProgress() + "%");
+            holder.startButton.setVisibility(View.VISIBLE);
         } else {
             //当下载失败时
             holder.progressBar.setProgress(0);
             holder.progressText.setText("下载失败");
+            holder.startButton.setVisibility(View.GONE);
         }
 
         //更新下载状态
