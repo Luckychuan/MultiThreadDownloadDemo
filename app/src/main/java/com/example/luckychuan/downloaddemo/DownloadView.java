@@ -6,13 +6,13 @@ package com.example.luckychuan.downloaddemo;
 
 public interface DownloadView {
 
-    void onInitFinish(String url,String name,long contentLength);
+    void onInitFinish(String url,String name);
 
     void onDownloadStart(String url);
 
     void onDownloadPause(String url);
 
-    void updateProgress(String url, long downloadedLength);
+    void updateProgress(String url, int progress);
 
     void onFail(String url);
 

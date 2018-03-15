@@ -4,8 +4,6 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
-import org.litepal.crud.DataSupport;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,110 +14,93 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * @Integer 下载的进度
- * @Integer 下载状态的提示
+ * String url
+ * Integer 下载进度
+ * Integer 下载状态
  */
-public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
+public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
 
     private static final String TAG = "DownloadAsyncTask";
 
-    private int mStatus;
-    private static final int STATUS_DOWNLOADING = 0;
     private static final int STATUS_SUCCEED = 1;
     private static final int STATUS_PAUSED = 2;
     private static final int STATUS_CANCELED = 3;
     private static final int STATUS_FAILED = 4;
 
-
-    private String mUrl;
-    private long mDownloadedLength;
-    private long mContentLength;
+    private boolean isPause = false;
+    private boolean isCancel = false;
 
     private DownLoadListener mListener;
 
-    public DownloadAsyncTask(String url,DownLoadListener listener) {
+    public DownloadAsyncTask(DownLoadListener listener) {
         mListener = listener;
-
-        task = t;
-        String url = task.getUrl();
-        String name = url.substring(url.lastIndexOf("/") + 1);
-        task.setName(name);
-
-
-
-    }
-
-    public String geturl() {
-        return mUrl;
     }
 
     @Override
-    protected Integer doInBackground(Void... params) {
-        mStatus = STATUS_DOWNLOADING;
+    protected Integer doInBackground(String... params) {
+        String url = params[0];
+        String name = url.substring(url.lastIndexOf("/"));
+        long downloadedLength = 0;
+        long contentLength = getContentLength(url);
 
-        //初始化文件
         String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-        File file = new File(directory + task.getName());
-        long contentLength = getContentLength(task.getUrl());
+        File file = new File(directory + name);
+
+        //判断是新任务
         if (file.exists()) {
-            task.setDownloadedLength(file.length());
-        }else{
-
+            downloadedLength = file.length();
+        } else {
+            mListener.onInitFinish(name);
         }
 
+        //无法下载
         if (contentLength == 0) {
-            mStatus = STATUS_FAILED;
             return STATUS_FAILED;
+        } else if (contentLength == downloadedLength) {
+            return STATUS_SUCCEED;
         }
-        task.setContentLength(contentLength);
-        TaskDB tDB = new TaskDB();
-        tDB.setContentLength(contentLength);
-        tDB.updateAll("url = ?",task.getUrl());
-        int progress;
 
-        //发送http请求下载
+        //开始下载
+        isPause = false;
+        isCancel = false;
+        mListener.onDownloadStart();
+
         InputStream is = null;
         RandomAccessFile saveFile = null;
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().
-                addHeader("RANGE", "bytes=" + task.getDownloadedLength() + "-") //指定从哪一个字节下载
-                .url(task.getUrl()).build();
+                addHeader("RANGE", "bytes=" + downloadedLength + "-") //指定从哪一个字节下载
+                .url(url).build();
         try {
             Response response = client.newCall(request).execute();
             //写入到本地
-           if(response!=null){
-               Log.d(TAG, "doInBackground: response not null");
-               is = response.body().byteStream();
-               saveFile = new RandomAccessFile(file, "rw");
-               saveFile.seek(task.getDownloadedLength());
-               int len;
-               byte[] buffer = new byte[1024];
-               while ((len = is.read(buffer)) != -1l) {
-                   if (mStatus == STATUS_PAUSED) {
-                       //更新进度到数据库中
-                       TaskDB taskDB = new TaskDB();
-                       taskDB.setDownloadedLength(task.getDownloadedLength());
-                       taskDB.updateAll("url=?", task.getUrl());
-                       return STATUS_PAUSED;
-                   } else if (mStatus == STATUS_CANCELED) {
-                       //从数据库中删除本条记录
-                       DataSupport.deleteAll(TaskDB.class, "url=?", task.getUrl());
-                       if (file != null) {
-                           file.delete();
-                       }
-                       return STATUS_CANCELED;
-                   }
-                   //获取已下载的进度
-                   saveFile.write(buffer, 0, len);
-                   task.setDownloadedLength(task.getDownloadedLength() + len);
-                   progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
-                   publishProgress(progress);
-               }
+            if (response != null) {
+                Log.d(TAG, "doInBackground: response not null");
+                is = response.body().byteStream();
+                saveFile = new RandomAccessFile(file, "rw");
+                saveFile.seek(downloadedLength);
+                int len;
+                byte[] buffer = new byte[1024];
+                while ((len = is.read(buffer)) != -1) {
+                    if (isPause) {
+                        return STATUS_PAUSED;
+                    } else if (isCancel) {
+                        if (file.exists()) {
+                            file.delete();
+                        }
+                        return STATUS_CANCELED;
+                    }
+                    //获取已下载的进度
+                    saveFile.write(buffer, 0, len);
+                    downloadedLength += len;
+                    int progress = (int) (downloadedLength * 100 / contentLength);
+                    publishProgress(progress);
+                }
 
-               response.body().close();
-           }else{
-               Log.d(TAG, "doInBackground:  response null");
-           }
+                response.body().close();
+            } else {
+                Log.d(TAG, "doInBackground:  response null");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -136,14 +117,10 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
             }
         }
 
-        if(task.getDownloadedLength()>=task.getContentLength()){
-            mStatus = STATUS_SUCCEED;
-            //更新进度到数据库中
-            TaskDB taskDB = new TaskDB();
-            taskDB.setDownloadedLength(task.getDownloadedLength());
-            taskDB.updateAll("url=?", task.getUrl());
+        if (contentLength == downloadedLength) {
+            return STATUS_SUCCEED;
         }
-        return mStatus;
+        return 0;
     }
 
     private long getContentLength(String url) {
@@ -159,7 +136,7 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
         if (response != null && response.isSuccessful()) {
             contentLength = response.body().contentLength();
             response.close();
-        }else{
+        } else {
             Log.d(TAG, "getContentLength: response null");
         }
         return contentLength;
@@ -168,31 +145,49 @@ public class DownloadAsyncTask extends AsyncTask<Void, Integer, Integer> {
     @Override
     protected void onPostExecute(Integer integer) {
         super.onPostExecute(integer);
-        mListener.DownloadResult(integer);
+        switch (integer) {
+            case STATUS_FAILED:
+                mListener.onFail();
+                break;
+            case STATUS_PAUSED:
+                mListener.onDownloadPause();
+                break;
+            case STATUS_CANCELED:
+                mListener.onCancel();
+            case STATUS_SUCCEED:
+                mListener.onFinish();
+                break;
+        }
     }
 
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
-        MainActivity.updateProgress(task.getUrl());
+        mListener.updateProgress(values[0]);
     }
 
     public void setPause() {
-        mStatus = STATUS_PAUSED;
+        isPause = true;
     }
 
     public void setCancel() {
-        mStatus = STATUS_CANCELED;
+        isCancel = true;
     }
 
 
-    interface DownLoadListener{
-        void onInitFinish(String name,long contentLength);
+    interface DownLoadListener {
+        void onInitFinish(String name);
+
         void onDownloadStart();
+
         void onDownloadPause();
-        void updateProgress(long downloadedLength);
+
+        void updateProgress(int progress);
+
         void onFail();
-        void onCancel(String name);
+
+        void onCancel();
+
         void onFinish();
     }
 

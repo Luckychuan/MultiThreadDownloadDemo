@@ -31,7 +31,7 @@ public class DownloadService extends Service {
 
         }
 
-        public void startDownload(String url,long downloadedLength,long contentLength) {
+        public void startDownload(String url) {
             // TODO: 2018/3/14
         }
 

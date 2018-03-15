@@ -42,29 +42,28 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         holder.progressBar.setProgress(0);
 
         //更新进度
-        if(task.getContentLength() != 0){
-            int progress = (int) (task.getDownloadedLength() * 100 / task.getContentLength());
-            holder.progressBar.setProgress(progress);
-            holder.progressText.setText("已下载：" + progress + "%");
-        }else {
+        if (task.getProgress() != -1) {
+            holder.progressBar.setProgress(task.getProgress());
+            holder.progressText.setText("已下载：" + task.getProgress() + "%");
+        } else {
             //当下载失败时
             holder.progressBar.setProgress(0);
             holder.progressText.setText("下载失败");
         }
 
         //更新下载状态
-        if(task.isDownloading()){
+        if (task.isDownloading()) {
             holder.startButton.setText("暂停");
-        }else{
+        } else {
             holder.startButton.setText("开始");
         }
 
         //下载完成时
-        if(task.getDownloadedLength() >= task.getContentLength()){
+        if (task.getProgress() >= 100) {
             holder.startButton.setVisibility(View.GONE);
             holder.cancelButton.setVisibility(View.GONE);
             holder.openButton.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             holder.startButton.setVisibility(View.VISIBLE);
             holder.cancelButton.setVisibility(View.VISIBLE);
             holder.openButton.setVisibility(View.GONE);
@@ -94,6 +93,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             openButton = (Button) itemView.findViewById(R.id.open_btn);
             fileName = (TextView) itemView.findViewById(R.id.file_name);
             progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+            progressBar.setMax(100);
             progressText = (TextView) itemView.findViewById(R.id.progress_text);
             cancelButton.setOnClickListener(this);
             startButton.setOnClickListener(this);
@@ -108,10 +108,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 case R.id.start_btn:
                     if (task.isDownloading()) {
                         startButton.setText("开始");
-                       mListener.onStartButtonClick(task, false);
+                        mListener.onStartButtonClick(task.getUrl(), false);
                     } else {
                         startButton.setText("暂停");
-                        mListener.onStartButtonClick(task, true);
+                        mListener.onStartButtonClick(task.getUrl(), true);
                     }
                     break;
 
@@ -121,8 +121,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
                 case R.id.open_btn:
                     String directory = Environment.getExternalStorageDirectory().getAbsolutePath();
-                    File file =new File(directory+task.getName());
-                    if (!file.exists()){
+                    File file = new File(directory + task.getName());
+                    if (!file.exists()) {
 
                     }
                     break;
@@ -132,7 +132,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     interface OnItemButtonClickListener {
-        void onStartButtonClick(Task task, boolean toStartDownload);
+        void onStartButtonClick(String url, boolean toStartDownload);
 
         void onCancelButtonClick(String url);
     }

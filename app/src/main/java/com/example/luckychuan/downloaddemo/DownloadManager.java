@@ -1,9 +1,7 @@
 package com.example.luckychuan.downloaddemo;
 
 import android.os.AsyncTask;
-import android.os.Environment;
 
-import java.io.File;
 import java.util.HashMap;
 
 /**
@@ -22,16 +20,16 @@ public class DownloadManager implements DownloadModel {
 
     @Override
     public void newTask(final String url) {
-        DownloadAsyncTask asyncTask = new DownloadAsyncTask(url, new DownloadAsyncTask.DownLoadListener() {
+        DownloadAsyncTask asyncTask = new DownloadAsyncTask(new DownloadAsyncTask.DownLoadListener() {
             @Override
-            public void onInitFinish(String name, long contentLength) {
+            public void onInitFinish(String name) {
                 // TODO: 2018/3/14 数据库，insert
 //                TaskDB taskDB = new TaskDB();
 //                taskDB.setUrl(url);
 //                taskDB.setName(name);
 //                taskDB.setDownloadedLength(0);
 //                taskDB.save();
-                mView.onInitFinish(url, name, contentLength);
+                mView.onInitFinish(url, name);
             }
 
             @Override
@@ -45,8 +43,8 @@ public class DownloadManager implements DownloadModel {
             }
 
             @Override
-            public void updateProgress(long downloadedLength) {
-                mView.updateProgress(url, downloadedLength);
+            public void updateProgress(int progress) {
+                mView.updateProgress(url,progress);
             }
 
             @Override
@@ -55,19 +53,12 @@ public class DownloadManager implements DownloadModel {
             }
 
             @Override
-            public void onCancel(String name) {
+            public void onCancel() {
                 mMap.remove(url);
                 // TODO: 2018/3/14 数据库操作
                 //        DataSupport.deleteAll(TaskDB.class, "url=?", url);
-                String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-                File file = new File(directory + name);
-                boolean isDeleted = false;
-                if (file.exists()) {
-                    isDeleted = file.delete();
-                }
-                if (isDeleted) {
-                    mView.onCancel(url);
-                }
+                mView.onCancel(url);
+
             }
 
             @Override
@@ -85,7 +76,7 @@ public class DownloadManager implements DownloadModel {
     }
 
     @Override
-    public void startDownload(String url, long downloadedLength, long contentLength) {
+    public void startDownload(String url) {
         mMap.get(url).execute();
     }
 

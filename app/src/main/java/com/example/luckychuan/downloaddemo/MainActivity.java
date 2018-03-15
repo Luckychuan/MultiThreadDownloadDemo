@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
         //获取权限
         int readStorageCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (readStorageCheck == PackageManager.PERMISSION_GRANTED) {
-            afterPermissionGranted();
+            initUI();
         } else {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
@@ -152,11 +152,11 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
     }
 
     @Override
-    public void onStartButtonClick(Task task, boolean toStartDownload) {
+    public void onStartButtonClick(String url, boolean toStartDownload) {
         if (toStartDownload) {
-            mServiceBinder.startDownload(task.getUrl(),task.getDownloadedLength(),task.getContentLength());
+            mServiceBinder.startDownload(url);
         } else {
-            mServiceBinder.pauseDownload(task.getUrl());
+            mServiceBinder.pauseDownload(url);
         }
     }
 
@@ -198,11 +198,10 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
      * 以下为逻辑模块回调更新UI
      * @param url
      * @param name
-     * @param contentLength
      */
     @Override
-    public void onInitFinish(String url, String name,long contentLength) {
-        Task task = new Task(url,name,contentLength);
+    public void onInitFinish(String url, String name) {
+        Task task = new Task(url,name);
         mTasks.add(task);
         mAdapter.notifyItemInserted(mTasks.size()-1);
     }
@@ -224,10 +223,10 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
     }
 
     @Override
-    public void updateProgress(String url, long downloadedLength) {
+    public void updateProgress(String url, int progress) {
         int position = getPosition(url);
         Task task = mTasks.get(position);
-        task.setDownloadedLength(downloadedLength);
+        task.setProgress(progress);
         mAdapter.notifyItemChanged(position,false);
     }
 
@@ -235,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
     public void onFail(String url) {
         int position = getPosition(url);
         Task task = mTasks.get(position);
-        task.setContentLength(0);
+        task.setProgress(-1);
         mAdapter.notifyItemChanged(position,false);
     }
 
