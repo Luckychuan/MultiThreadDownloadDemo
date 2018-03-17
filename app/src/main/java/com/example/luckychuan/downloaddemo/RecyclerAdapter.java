@@ -11,7 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Luckychuan on 2017/3/24.
@@ -20,10 +20,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     private static final String TAG = "RecyclerAdapter";
 
-    private ArrayList<Task> mTasks;
+    private List<Task> mTasks;
     private OnItemButtonClickListener mListener;
 
-    public RecyclerAdapter(ArrayList<Task> tasks, OnItemButtonClickListener listener) {
+    public RecyclerAdapter(List<Task> tasks, OnItemButtonClickListener listener) {
         mTasks = tasks;
         mListener = listener;
     }

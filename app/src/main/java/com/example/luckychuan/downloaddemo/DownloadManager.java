@@ -6,10 +6,10 @@ import android.util.Log;
 import java.util.HashMap;
 
 /**
- * 用于 1.管理AsyncTask多任务下载；2.操作数据保存下载进度
+ * 管理AsyncTask多任务下载
  */
 
-public class DownloadManager implements DownloadModel {
+public class DownloadManager extends DownloadModel {
 
     private HashMap<String, DownloadAsyncTask> mMap = new HashMap<>();
     private DownloadView mView;
@@ -48,8 +48,8 @@ public class DownloadManager implements DownloadModel {
             @Override
             public void onCancel() {
                 mMap.remove(url);
-                // TODO: 2018/3/14 数据库操作
-                //        DataSupport.deleteAll(TaskDB.class, "url=?", url);
+                // TODO: 2018/3/17
+//                mManager.delete(url);
                 mView.onCancel(url);
 
             }
@@ -57,9 +57,7 @@ public class DownloadManager implements DownloadModel {
             @Override
             public void onFinish() {
                 mMap.remove(url);
-                // TODO: 2018/3/14 数据库操作
-                //        DataSupport.deleteAll(TaskDB.class, "url=?", url);
-
+                mView.onFinish();
             }
         });
         mMap.put(url, asyncTask);
@@ -82,8 +80,4 @@ public class DownloadManager implements DownloadModel {
         mMap.get(url).setCancel();
     }
 
-    @Override
-    public void saveProgress(long downloadedLength) {
-        // TODO: 2018/3/14 数据库 update
-    }
 }

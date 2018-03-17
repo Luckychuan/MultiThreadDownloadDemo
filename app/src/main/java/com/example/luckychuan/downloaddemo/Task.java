@@ -19,6 +19,12 @@ public class Task implements Serializable {
         isDownloading = true;
     }
 
+    public Task(String url, String name, int progress) {
+        this.url = url;
+        this.name = name;
+        this.progress = progress;
+        this.isDownloading = false;
+    }
 
     /**
      * 以下为自动生成的方法

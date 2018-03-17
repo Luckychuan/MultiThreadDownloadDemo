@@ -25,10 +25,10 @@
         android:text="@string/new_task2" />
 
     <Button
-        android:id="@+id/query"
+        android:id="@+id/finish_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/query" />
+        android:text="finish activity后台下载" />
 
 
 </LinearLayout>

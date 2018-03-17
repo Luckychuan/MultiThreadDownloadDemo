@@ -16,4 +16,6 @@ public interface DownloadView {
 
     void onCancel(String url);
 
+    void onFinish();
+
 }

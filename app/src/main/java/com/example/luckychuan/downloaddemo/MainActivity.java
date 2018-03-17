@@ -16,25 +16,17 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import org.litepal.crud.DataSupport;
-import org.litepal.tablemanager.Connector;
-
-import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements DownloadView, RecyclerAdapter.OnItemButtonClickListener, View.OnClickListener {
+
+public class MainActivity extends AppCompatActivity implements DownloadService.OnTaskDataChangeListener, RecyclerAdapter.OnItemButtonClickListener, View.OnClickListener {
 
     private static final String TAG = "MainActivity";
     private static final String URL1 = "http://m.down.sandai.net/MobileThunder/Android_5.34.2.4700/XLWXguanwang.apk";
     private static final String URL2 = "http://s1.music.126.net/download/android/CloudMusic_official_4.0.0_179175.apk";
-
-    //RecyclerView的数据源
-    private static ArrayList<Task> mTasks = new ArrayList<>();
 
     private static RecyclerAdapter mAdapter;
 
@@ -44,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mServiceBinder = (DownloadService.DownloadBinder) service;
-            mServiceBinder.setDownloadView(MainActivity.this);
+            mServiceBinder.setListener(MainActivity.this);
         }
 
         @Override
@@ -81,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
-        stopService(new Intent(this, DownloadService.class));
     }
 
     @Override
@@ -111,53 +102,18 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
     }
 
     private void initUI() {
-//        //从数据库中获取数据
-//        List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-//        if (taskList.size() != 0) {
-//            for (TaskDB taskDB : taskList) {
-//                mTasks.add(new Task(taskDB.getUrl(), taskDB.getName(), taskDB.getContentLength(), taskDB.getDownloadedLength()));
-//            }
-//        }
-
-        //        //创建LitePal数据库
-//        Connector.getDatabase();
-        // TODO: 2018/3/12
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        //防止进度刷新时闪烁
-        ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
-        mAdapter = new RecyclerAdapter(mTasks, this);
-        recyclerView.setAdapter(mAdapter);
-
         Button button = (Button) findViewById(R.id.new_task_btn);
         button.setOnClickListener(this);
         Button button2 = (Button) findViewById(R.id.new_task2_btn);
         button2.setOnClickListener(this);
-
+        Button button4 = (Button) findViewById(R.id.finish_activity);
+        button4.setOnClickListener(this);
     }
 
 
     /**
      * 以下为UI操控逻辑部分
      */
-
-    private void newTask(String url) {
-        //判断任务是否已经存在
-        for (Task t : mTasks) {
-            if (t.getUrl().equals(url)) {
-                Toast.makeText(MainActivity.this, "任务已经存在", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
-
-        String name = url.substring(url.lastIndexOf("/") + 1);
-        Task task = new Task(url, name);
-        mTasks.add(task);
-        mAdapter.notifyItemInserted(mTasks.size() - 1);
-
-        mServiceBinder.startDownload(url);
-    }
 
     @Override
     public void onStartButtonClick(String url, boolean toStartDownload) {
@@ -173,90 +129,60 @@ public class MainActivity extends AppCompatActivity implements DownloadView, Rec
         mServiceBinder.cancelDownload(url);
     }
 
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.new_task_btn:
-                newTask(URL1);
+                mServiceBinder.newTask(URL1);
                 break;
 
             case R.id.new_task2_btn:
-                newTask(URL2);
+                mServiceBinder.newTask(URL2);
                 break;
 
-//            case R.id.query:
-//                List<TaskDB> taskList = DataSupport.findAll(TaskDB.class);
-//                if (taskList.size() == 0) {
-//                    Log.d(TAG, "onClick: 无数据");
-//                }
-//                for (TaskDB t : taskList) {
-//                    Log.d(TAG, "onClick: " + t.getUrl());
-//                    Log.d(TAG, "onClick: " + t.getName());
-//                    Log.d(TAG, "onClick: " + t.getDownloadedLength());
-//                    Log.d(TAG, "onClick: " + t.getContentLength());
-//                }
-//                break;
+            case R.id.stop_service:
+                unbindService(mConnection);
+                stopService(new Intent(this, DownloadService.class));
+                break;
+
+            case R.id.finish_activity:
+                finish();
+                break;
         }
     }
 
-
-    @Override
-    public void onDownloadStart(String url) {
-        int position = getPosition(url);
-        Task task = mTasks.get(position);
-        task.setDownloading(true);
-        mAdapter.notifyItemChanged(position, false);
-    }
-
-    @Override
-    public void onDownloadPause(String url) {
-        int position = getPosition(url);
-        Task task = mTasks.get(position);
-        task.setDownloading(false);
-        mAdapter.notifyItemChanged(position, false);
-    }
-
-    @Override
-    public void updateProgress(String url, int progress) {
-        int position = getPosition(url);
-        Task task = mTasks.get(position);
-        task.setProgress(progress);
-        mAdapter.notifyItemChanged(position, false);
-    }
-
-    @Override
-    public void onFail(String url) {
-        int position = getPosition(url);
-        Task task = mTasks.get(position);
-        task.setProgress(-1);
-        task.setDownloading(false);
-        mAdapter.notifyItemChanged(position, false);
-    }
-
-    @Override
-    public void onCancel(String url) {
-        int position = getPosition(url);
-        mAdapter.notifyItemRemoved(position);
-        mTasks.remove(position);
-    }
 
 
     /**
-     * 通过url找到当前task在list的position
+     * 以下为当Serivce中数据变化时回调刷新UI
      *
-     * @param url
-     * @return
+     * @param list
      */
-    private int getPosition(String url) {
-        for (int i = 0; i < mTasks.size(); i++) {
-            Task task = mTasks.get(i);
-            if (url.equals(task.getUrl())) {
-                return i;
-            }
-        }
-        return -1;
+
+    @Override
+    public void onInitFinish(List<Task> list) {
+        //初始化RecyclerView
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        //防止进度刷新时闪烁
+        ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        mAdapter = new RecyclerAdapter(list, this);
+        recyclerView.setAdapter(mAdapter);
     }
 
+    @Override
+    public void onDataInsert(int position) {
+        mAdapter.notifyItemInserted(position);
+    }
 
+    @Override
+    public void onDataChange(int position) {
+        mAdapter.notifyItemChanged(position);
+    }
+
+    @Override
+    public void onDataRemove(int position) {
+        mAdapter.notifyItemRemoved(position);
+    }
 }

@@ -4,11 +4,9 @@ package com.example.luckychuan.downloaddemo;
  * Created by Luckychuan on 2018/3/14.
  */
 
-public interface DownloadModel {
+public abstract class DownloadModel {
 
-    void addDownloadTask(String url);
-    void pauseDownload(String url);
-    void cancelDownload(String url);
-    void saveProgress(long downloadedLength);
-
+    abstract void addDownloadTask(String url);
+    abstract void pauseDownload(String url);
+    abstract void cancelDownload(String url);
 }
