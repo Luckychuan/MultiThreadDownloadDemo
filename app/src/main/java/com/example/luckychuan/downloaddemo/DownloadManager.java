@@ -2,7 +2,6 @@ package com.example.luckychuan.downloaddemo;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import java.util.HashMap;
 
 /**
@@ -24,11 +23,6 @@ public class DownloadManager extends DownloadModel {
         DownloadAsyncTask asyncTask = new DownloadAsyncTask(new DownloadAsyncTask.DownLoadListener() {
 
             @Override
-            public void onDownloadStart() {
-                mView.onDownloadStart(url);
-            }
-
-            @Override
             public void onDownloadPause() {
                 mMap.remove(url);
                 mView.onDownloadPause(url);
@@ -48,8 +42,6 @@ public class DownloadManager extends DownloadModel {
             @Override
             public void onCancel() {
                 mMap.remove(url);
-                // TODO: 2018/3/17
-//                mManager.delete(url);
                 mView.onCancel(url);
 
             }
@@ -57,7 +49,6 @@ public class DownloadManager extends DownloadModel {
             @Override
             public void onFinish() {
                 mMap.remove(url);
-                mView.onFinish();
             }
         });
         mMap.put(url, asyncTask);
@@ -67,17 +58,20 @@ public class DownloadManager extends DownloadModel {
 
     @Override
     public void pauseDownload(String url) {
-        mMap.get(url).setPause();
+        DownloadAsyncTask task = mMap.get(url);
+        task.setPause();
+        mMap.remove(task);
     }
 
     @Override
     public void cancelDownload(String url) {
         DownloadAsyncTask task = mMap.get(url);
+        //当未下载时点击取消，要新建AsyncTask
         if (task == null) {
             addDownloadTask(url);
-            Log.d("cancel", "cancelDownload: ");
         }
-        mMap.get(url).setCancel();
+        task.setCancel();
+        mMap.remove(task);
     }
 
 }

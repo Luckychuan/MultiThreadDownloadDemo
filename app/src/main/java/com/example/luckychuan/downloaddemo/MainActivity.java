@@ -16,6 +16,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements DownloadService.O
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            mServiceBinder = null;
         }
     };
 
@@ -71,8 +72,8 @@ public class MainActivity extends AppCompatActivity implements DownloadService.O
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         unbindService(mConnection);
+        super.onDestroy();
     }
 
     @Override
@@ -106,15 +107,18 @@ public class MainActivity extends AppCompatActivity implements DownloadService.O
         button.setOnClickListener(this);
         Button button2 = (Button) findViewById(R.id.new_task2_btn);
         button2.setOnClickListener(this);
+        Button button3 = (Button) findViewById(R.id.stop_service);
+        button3.setOnClickListener(this);
         Button button4 = (Button) findViewById(R.id.finish_activity);
         button4.setOnClickListener(this);
     }
 
 
-    /**
-     * 以下为UI操控逻辑部分
-     */
 
+
+    /**
+     * 以下为UI按钮被点击后控制service部分
+     */
     @Override
     public void onStartButtonClick(String url, boolean toStartDownload) {
         if (toStartDownload) {
@@ -141,10 +145,10 @@ public class MainActivity extends AppCompatActivity implements DownloadService.O
                 break;
 
             case R.id.stop_service:
-                unbindService(mConnection);
+                mServiceBinder.saveProgress();
                 stopService(new Intent(this, DownloadService.class));
+                finish();
                 break;
-
             case R.id.finish_activity:
                 finish();
                 break;
@@ -154,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements DownloadService.O
 
 
     /**
-     * 以下为当Serivce中数据变化时回调刷新UI
+     * 以下为当Service中数据变化时回调刷新RecyclerView的数据
      *
      * @param list
      */

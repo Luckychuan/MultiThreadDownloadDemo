@@ -37,12 +37,6 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     }
 
     @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        mListener.onDownloadStart();
-    }
-
-    @Override
     protected Integer doInBackground(String... params) {
         String url = params[0];
         String name = url.substring(url.lastIndexOf("/"));
@@ -184,8 +178,6 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
 
     public interface DownLoadListener {
 
-        void onDownloadStart();
-
         void onDownloadPause();
 
         void updateProgress(int progress);
@@ -196,5 +188,4 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
 
         void onFinish();
     }
-
 }

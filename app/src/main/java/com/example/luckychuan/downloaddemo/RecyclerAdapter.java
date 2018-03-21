@@ -63,11 +63,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         //下载完成时
         if (task.getProgress() >= 100) {
             holder.startButton.setVisibility(View.GONE);
-            holder.cancelButton.setVisibility(View.GONE);
             holder.openButton.setVisibility(View.VISIBLE);
         } else {
             holder.startButton.setVisibility(View.VISIBLE);
-            holder.cancelButton.setVisibility(View.VISIBLE);
             holder.openButton.setVisibility(View.GONE);
         }
 

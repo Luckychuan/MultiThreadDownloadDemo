@@ -61,4 +61,14 @@ public class Task implements Serializable {
     public void setProgress(int progress) {
         this.progress = progress;
     }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "url='" + url + '\'' +
+                ", name='" + name + '\'' +
+                ", progress=" + progress +
+                ", isDownloading=" + isDownloading +
+                '}';
+    }
 }

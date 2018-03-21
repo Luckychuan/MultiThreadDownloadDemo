@@ -25,6 +25,12 @@
         android:text="@string/new_task2" />
 
     <Button
+        android:id="@+id/stop_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="stop_service退出应用" />
+
+    <Button
         android:id="@+id/finish_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
