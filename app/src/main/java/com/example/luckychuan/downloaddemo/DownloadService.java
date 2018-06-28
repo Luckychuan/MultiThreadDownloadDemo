@@ -16,7 +16,7 @@ import java.util.List;
 public class DownloadService extends Service implements DownloadView {
 
     private static final String TAG = "DownloadService";
-    private static ArrayList<Task> mTasks;
+    private  ArrayList<Task> mTasks;
     private OnTaskDataChangeListener mListener;
     private DatabaseManager mDataBaseManager;
     private DownloadManager mDownloadManager;
@@ -86,12 +86,6 @@ public class DownloadService extends Service implements DownloadView {
             if (mTasks == null) {
                 mTasks = new ArrayList<>();
                 mTasks.addAll(mDataBaseManager.query());
-
-//                //debug
-//                for(Task task:mTasks){
-//                    Log.d(TAG, "setListener: "+task.toString());
-//                }
-
             }
 
             mListener.onInitFinish(mTasks);

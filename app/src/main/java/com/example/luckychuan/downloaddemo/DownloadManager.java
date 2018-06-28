@@ -69,6 +69,7 @@ public class DownloadManager extends DownloadModel {
         //当未下载时点击取消，要新建AsyncTask
         if (task == null) {
             addDownloadTask(url);
+            task = mMap.get(url);
         }
         task.setCancel();
         mMap.remove(task);
